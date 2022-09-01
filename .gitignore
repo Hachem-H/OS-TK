@@ -1,0 +1,4 @@
+**/bin
+**/bin-int
+
+vendor/gnu-efi/x86_64
