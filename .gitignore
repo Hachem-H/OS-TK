@@ -1,4 +1,7 @@
 **/bin
 **/bin-int
 
+.vs/
+.vscode/
+
 vendor/gnu-efi/x86_64

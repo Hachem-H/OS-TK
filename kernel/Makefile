@@ -7,7 +7,8 @@ CC = gcc
 LD = ld
 
 CC_FLAGS = -ffreestanding \
-		   -fshort-wchar
+		   -fshort-wchar  \
+		   -I../include
 LD_FLAGS = -T linker.ld \
 		   -Bsymbolic   \
 		   -nostdlib    \
@@ -34,9 +35,9 @@ clean:
 	@rm -rf $(BIN_DIR)
 	@rm -rf $(OBJ_DIR)
 run:
-	qemu-system-x86_64 -drive file=$(BIN_DIR)/$(OS_NAME).img -m 256M -cpu qemu64                               \
-					   -drive if=pflash,format=raw,unit=0,file="$(OVMF_DIR)/OVMF_CODE-pure-efi.fd",readonly=on \
-					   -drive if=pflash,format=raw,unit=1,file="$(OVMF_DIR)/OVMF_VARS-pure-efi.fd" -net none
+	qemu-system-x86_64 -drive file=$(BIN_DIR)/$(OS_NAME).img,format=raw -m 256M -cpu qemu64 -net none          \
+	                   -drive if=pflash,format=raw,unit=0,file="$(OVMF_DIR)/OVMF_CODE-pure-efi.fd",readonly=on \
+	                   -drive if=pflash,format=raw,unit=1,file="$(OVMF_DIR)/OVMF_VARS-pure-efi.fd",readonly=on
 
 kernel: env $(OBJS) link
 link:
@@ -48,5 +49,6 @@ build-img: env kernel
 	mmd -i $(BIN_DIR)/$(OS_NAME).img ::/EFI
 	mmd -i $(BIN_DIR)/$(OS_NAME).img ::/EFI/BOOT
 	mcopy -i $(BIN_DIR)/$(OS_NAME).img $(BOOT_EFI) ::/EFI/BOOT
-	mcopy -i $(BIN_DIR)/$(OS_NAME).img startup.nsh ::
+	mcopy -i $(BIN_DIR)/$(OS_NAME).img res/startup.nsh ::
+	mcopy -i $(BIN_DIR)/$(OS_NAME).img res/zap-light16.psf ::
 	mcopy -i $(BIN_DIR)/$(OS_NAME).img $(BIN_DIR)/kernel.elf ::

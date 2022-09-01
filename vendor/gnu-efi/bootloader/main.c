@@ -2,6 +2,11 @@
 #include <elf.h>
 #include <efilib.h>
 
+#include "FrameBuffer.h"
+
+#define PSF1_MAGIC0 0x36
+#define PSF1_MAGIC1 0x04
+
 static int memcmp(const void* lh, const void* rh, unsigned long long size)
 {
 	const unsigned char* lhPointer = lh;
@@ -14,6 +19,29 @@ static int memcmp(const void* lh, const void* rh, unsigned long long size)
 			return 1;
 
 	return 0;
+}
+
+FrameBuffer* InitializeGraphicsOutputProtocol() 
+{
+	static FrameBuffer frameBuffer;
+	EFI_GUID gopGUID = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+	EFI_GRAPHICS_OUTPUT_PROTOCOL* gop;
+
+	if(EFI_ERROR(uefi_call_wrapper(BS->LocateProtocol, 3, &gopGUID, NULL, (void**) &gop)))
+	{
+		Print(L"ERR: Unable to locate Graphic Output Protocol\n\r");
+		return NULL;
+	}
+	else
+		Print(L"OK: Graphic Output Protocol located\n\r");
+
+	frameBuffer.baseAddress       = (void*)gop->Mode->FrameBufferBase;
+	frameBuffer.bufferSize        = gop->Mode->FrameBufferSize;
+	frameBuffer.width             = gop->Mode->Info->HorizontalResolution;
+	frameBuffer.height            = gop->Mode->Info->VerticalResolution;
+	frameBuffer.pixelsPerScanLine = gop->Mode->Info->PixelsPerScanLine;
+
+	return &frameBuffer;
 }
 
 static EFI_FILE* LoadFile(EFI_FILE* directory, CHAR16* path, EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
@@ -35,6 +63,42 @@ static EFI_FILE* LoadFile(EFI_FILE* directory, CHAR16* path, EFI_HANDLE imageHan
 	if (status != EFI_SUCCESS)
 		return NULL;
 	return loadedFile;
+}
+
+
+PSFFont* LoadPSF1Font(EFI_FILE* directory, CHAR16* path, EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
+{
+	EFI_FILE* font = LoadFile(directory, path, imageHandle, systemTable);
+	if (font == NULL) 
+		return NULL;
+
+	PSFHeader* fontHeader;
+	systemTable->BootServices->AllocatePool(EfiLoaderData, sizeof(PSFHeader), (void**) &fontHeader);
+
+	UINTN size = sizeof(PSFHeader);
+	font->Read(font, &size, fontHeader);
+
+	if (fontHeader->magic[0] != PSF1_MAGIC0 || 
+		fontHeader->magic[1] != PSF1_MAGIC1)
+		return NULL;
+
+	UINTN glyphBufferSize = fontHeader->charSize * 256;
+	if (fontHeader->mode == 1)
+		glyphBufferSize = fontHeader->charSize * 512;
+
+	void* glyphBuffer;
+	{
+		font->SetPosition(font, sizeof(PSFHeader));
+		systemTable->BootServices->AllocatePool(EfiLoaderData, glyphBufferSize, (void**) &glyphBuffer);
+		font->Read(font, &glyphBufferSize, glyphBuffer);
+	}
+
+	PSFFont* finishedFont;
+	systemTable->BootServices->AllocatePool(EfiLoaderData, sizeof(PSFFont), (void**) &finishedFont);
+	finishedFont->header = fontHeader;
+	finishedFont->glyphBuffer = glyphBuffer;
+	return finishedFont;
+
 }
 
 EFI_STATUS efi_main (EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
@@ -97,8 +161,24 @@ EFI_STATUS efi_main (EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 		}
 
 	Print(L"OK: Kernel ready.\n\r");
-	int (*kernelEntry)() = ((__attribute__((sysv_abi)) int (*)()) header.e_entry);
-	Print(L"Kernel returned: %d\r\n", kernelEntry());
+	void (*kernelEntry)(FrameBuffer*, PSFFont*) = ((__attribute__((sysv_abi)) void (*)(FrameBuffer*, PSFFont*)) header.e_entry);
 
+	PSFFont* font = LoadPSF1Font(NULL, L"zap-light16.psf", imageHandle, systemTable);
+	if (font == NULL)
+		Print(L"ERR: Could not load font\n\r");
+	else
+		Print(L"OK: Loaded font & Character Size = %d\n\r", font->header->charSize);
+
+	FrameBuffer* frameBuffer = InitializeGraphicsOutputProtocol();
+	{
+		Print(L"==== Frame Buffer Info ====\n\r");
+		Print(L"Base: 0x%X\n\r", frameBuffer->baseAddress);
+		Print(L"Size: 0x%X\n\r", frameBuffer->bufferSize);
+		Print(L"Width: %d\n\r", frameBuffer->width);
+		Print(L"Height: %d\n\r", frameBuffer->height);
+		Print(L"Pixels/Scanline: %d\n\r", frameBuffer->pixelsPerScanLine);
+	}
+
+	kernelEntry(frameBuffer, font);
 	return EFI_SUCCESS;
 }
