@@ -4,12 +4,14 @@ GNU-EFI_DIR = ../vendor/gnu-efi
 OVMF_DIR    = ../vendor/OVMF
  
 CC = gcc
+LD = ld
 
 CC_FLAGS = -ffreestanding \
 		   -fshort-wchar
-LD_FLAGS = -T -shared \
-		   -Bsymbolic \
-		   -nostdlib
+LD_FLAGS = -T linker.ld \
+		   -Bsymbolic   \
+		   -nostdlib    \
+		   -static
 
 SRC_DIR := src
 BIN_DIR := bin
@@ -22,20 +24,29 @@ SRCS = $(call rwildcard,$(SRC_DIR),*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 DIRS = $(wildcard $(SRC_DIR)/*)
 
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CC_FLAGS) -c $^ -o $@
+
 env:
-	mkdir -p $(BIN_DIR)
-	mkdir -p $(OBJ_DIR)
+	@mkdir -p $(BIN_DIR)
+	@mkdir -p $(OBJ_DIR)
 clean:
-	rm -p $(BIN_DIR)
-	rm -p $(OBJ_DIR)
+	@rm -rf $(BIN_DIR)
+	@rm -rf $(OBJ_DIR)
 run:
 	qemu-system-x86_64 -drive file=$(BIN_DIR)/$(OS_NAME).img -m 256M -cpu qemu64                               \
 					   -drive if=pflash,format=raw,unit=0,file="$(OVMF_DIR)/OVMF_CODE-pure-efi.fd",readonly=on \
 					   -drive if=pflash,format=raw,unit=1,file="$(OVMF_DIR)/OVMF_VARS-pure-efi.fd" -net none
-build-img: env
+
+kernel: env $(OBJS) link
+link:
+	$(LD) $(LD_FLAGS) -o $(BIN_DIR)/kernel.elf $(OBJS)
+
+build-img: env kernel
 	dd if=/dev/zero of=$(BIN_DIR)/$(OS_NAME).img bs=512 count=93750
 	mformat -i $(BIN_DIR)/$(OS_NAME).img -f 1440 ::
 	mmd -i $(BIN_DIR)/$(OS_NAME).img ::/EFI
 	mmd -i $(BIN_DIR)/$(OS_NAME).img ::/EFI/BOOT
 	mcopy -i $(BIN_DIR)/$(OS_NAME).img $(BOOT_EFI) ::/EFI/BOOT
 	mcopy -i $(BIN_DIR)/$(OS_NAME).img startup.nsh ::
+	mcopy -i $(BIN_DIR)/$(OS_NAME).img $(BIN_DIR)/kernel.elf ::
