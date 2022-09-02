@@ -2,7 +2,8 @@
 #include <elf.h>
 #include <efilib.h>
 
-#include "FrameBuffer.h"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#include "drivers/Display.h"
 
 #define PSF1_MAGIC0 0x36
 #define PSF1_MAGIC1 0x04

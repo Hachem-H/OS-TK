@@ -40,11 +40,12 @@ include $(SRCDIR)/../Make.defaults
 VPATH  = $(SRCDIR)
 TOPDIR = $(SRCDIR)/..
 CDIR   = $(TOPDIR)/..
+KERNEL_INCLUDE = ../../../../kernel/src
 
 LINUX_HEADERS = /usr/src/sys/build
 CPPFLAGS += -D__KERNEL__               \
 		    -I$(LINUX_HEADERS)/include \
-		    -I../../../../include
+			-I$(KERNEL_INCLUDE)
 CRTOBJS	 = ../gnuefi/crt0-efi-$(ARCH).o
 LDSCRIPT = $(TOPDIR)/gnuefi/elf_$(ARCH)_efi.lds
 
