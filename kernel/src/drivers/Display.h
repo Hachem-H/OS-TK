@@ -41,6 +41,10 @@ typedef struct TextRenderer_t
 void TextRenderer_InitWith(FrameBuffer* frameBuffer, PSFFont* font);
 void TextRenderer_RenderChar(char character, uint32_t xOff, uint32_t yOff);
 void TextRenderer_RenderText(const char* string);
+void TextRenderer_RenderNumber(int64_t value);
+void TextRenderer_RenderHex64(uint64_t value);
+void TextRenderer_RenderHex32(uint32_t value);
+void TextRenderer_RenderHex16(uint16_t value);
 
 void TextRenderer_SetFont(PSFFont* font);
 void TextRenderer_SetColor(uint32_t color);
