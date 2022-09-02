@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 typedef struct PSFHeader_t 
 {
 	unsigned char magic[2];
@@ -18,25 +20,29 @@ typedef struct FrameBuffer_t
     void* baseAddress;
 	unsigned long long bufferSize;
 
-	unsigned int width;
-	unsigned int height;
-	unsigned int pixelsPerScanLine;
+	uint32_t width;
+	uint32_t height;
+	uint32_t pixelsPerScanLine;
 } FrameBuffer;
 
 typedef struct TextRenderer_t
 {
     struct 
     {
-        unsigned int x;
-        unsigned int y;
+        uint32_t x;
+        uint32_t y;
     } cursorPosition;
 
     FrameBuffer* frameBuffer;
-    unsigned int color;
+    uint32_t color;
     PSFFont* font;
 } TextRenderer;
 
-static TextRenderer GlobalTextRenderer;
 void TextRenderer_InitWith(FrameBuffer* frameBuffer, PSFFont* font);
-void TextRenderer_RenderChar(char character, unsigned int xOff, unsigned int yOff);
+void TextRenderer_RenderChar(char character, uint32_t xOff, uint32_t yOff);
 void TextRenderer_RenderText(const char* string);
+
+void TextRenderer_SetFont(PSFFont* font);
+void TextRenderer_SetColor(uint32_t color);
+void TextRenderer_SetFrameBuffer(FrameBuffer* frameBuffer);
+void TextRenderer_SetCursorPosition(uint32_t x, uint32_t y);

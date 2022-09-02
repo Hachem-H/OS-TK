@@ -1,12 +1,14 @@
 #include "Display.h"
 
+static TextRenderer GlobalTextRenderer;
+
 void TextRenderer_InitWith(FrameBuffer* frameBuffer, PSFFont* font)
 {
     GlobalTextRenderer.cursorPosition.x = 0;
     GlobalTextRenderer.cursorPosition.y = 0;
 
     GlobalTextRenderer.frameBuffer = frameBuffer;
-    GlobalTextRenderer.color = 0xFFFFFFFF;
+    GlobalTextRenderer.color = 0xFFFFFF;
     GlobalTextRenderer.font = font;
 }
 
@@ -33,10 +35,11 @@ void TextRenderer_RenderText(const char* string)
     const char* stringPointer = string;
     while (*stringPointer != 0x00)
     {
-        TextRenderer_RenderChar(*stringPointer, GlobalTextRenderer.cursorPosition.x,
-                                                GlobalTextRenderer.cursorPosition.y);
+        if (*stringPointer != '\n')
+            TextRenderer_RenderChar(*stringPointer, GlobalTextRenderer.cursorPosition.x,
+                                                    GlobalTextRenderer.cursorPosition.y);
+
         GlobalTextRenderer.cursorPosition.x += 8;
-        
         if(GlobalTextRenderer.cursorPosition.x+8 > GlobalTextRenderer.frameBuffer->width ||
            *stringPointer == '\n') 
         {
@@ -47,3 +50,8 @@ void TextRenderer_RenderText(const char* string)
         stringPointer++;
     }
 }
+void TextRenderer_SetFont(PSFFont* font)                    { GlobalTextRenderer.font = font;               }
+void TextRenderer_SetColor(uint32_t color)                  { GlobalTextRenderer.color = color;             }
+void TextRenderer_SetFrameBuffer(FrameBuffer* frameBuffer)  { GlobalTextRenderer.frameBuffer = frameBuffer; }
+void TextRenderer_SetCursorPosition(uint32_t x, uint32_t y) { GlobalTextRenderer.cursorPosition.x = x; 
+                                                              GlobalTextRenderer.cursorPosition.y = y;      }

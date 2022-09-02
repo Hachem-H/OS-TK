@@ -8,6 +8,16 @@
 #define PSF1_MAGIC0 0x36
 #define PSF1_MAGIC1 0x04
 
+typedef struct BootInfo_t
+{
+	FrameBuffer* frameBuffer;
+	PSFFont* font;
+
+	EFI_MEMORY_DESCRIPTOR* memoryMap;
+	UINTN memoryMapSize;
+	UINTN descriptorSize;
+} BootInfo;
+
 static int memcmp(const void* lh, const void* rh, unsigned long long size)
 {
 	const unsigned char* lhPointer = lh;
@@ -66,7 +76,6 @@ static EFI_FILE* LoadFile(EFI_FILE* directory, CHAR16* path, EFI_HANDLE imageHan
 	return loadedFile;
 }
 
-
 PSFFont* LoadPSF1Font(EFI_FILE* directory, CHAR16* path, EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 {
 	EFI_FILE* font = LoadFile(directory, path, imageHandle, systemTable);
@@ -99,7 +108,6 @@ PSFFont* LoadPSF1Font(EFI_FILE* directory, CHAR16* path, EFI_HANDLE imageHandle,
 	finishedFont->header = fontHeader;
 	finishedFont->glyphBuffer = glyphBuffer;
 	return finishedFont;
-
 }
 
 EFI_STATUS efi_main (EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
@@ -162,8 +170,7 @@ EFI_STATUS efi_main (EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 		}
 
 	Print(L"OK: Kernel ready.\n\r");
-	void (*kernelEntry)(FrameBuffer*, PSFFont*) = ((__attribute__((sysv_abi)) void (*)(FrameBuffer*, PSFFont*)) header.e_entry);
-
+	
 	PSFFont* font = LoadPSF1Font(NULL, L"zap-light16.psf", imageHandle, systemTable);
 	if (font == NULL)
 		Print(L"ERR: Could not load font\n\r");
@@ -180,6 +187,29 @@ EFI_STATUS efi_main (EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 		Print(L"Pixels/Scanline: %d\n\r", frameBuffer->pixelsPerScanLine);
 	}
 
-	kernelEntry(frameBuffer, font);
+	EFI_MEMORY_DESCRIPTOR* memoryMap = NULL;
+	UINTN memoryMapSize;
+	UINTN memoryMapKey;
+	UINTN descriptorSize;
+	UINT32 descriptorVersion;
+	{
+		systemTable->BootServices->GetMemoryMap(&memoryMapSize, memoryMap, &memoryMapKey, 
+											    &descriptorSize, &descriptorVersion);
+		systemTable->BootServices->AllocatePool(EfiLoaderData, memoryMapSize, (void**) &memoryMap);
+		systemTable->BootServices->GetMemoryMap(&memoryMapSize, memoryMap, &memoryMapKey, 
+											    &descriptorSize, &descriptorVersion);
+	}
+
+	BootInfo bootInfo;
+	bootInfo.frameBuffer = frameBuffer;
+	bootInfo.font = font;
+	bootInfo.memoryMap = memoryMap;
+	bootInfo.memoryMapSize = memoryMapSize;
+	bootInfo.descriptorSize = descriptorSize;
+
+	systemTable->BootServices->ExitBootServices(imageHandle, memoryMapKey);
+
+	void (*kernelEntry)(BootInfo*) = ((__attribute__((sysv_abi)) void (*)(BootInfo*)) header.e_entry);
+	kernelEntry(&bootInfo);
 	return EFI_SUCCESS;
 }
