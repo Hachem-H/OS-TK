@@ -1,7 +1,8 @@
 # OS-TK
 The Operating System Tool Kit is a platform to turn any CLI C/C++ application into a x64 operating system. Designed originally to create an OS called [Cummer-OS](https://github.com/Hachem-H/Cummer-OS) as joke for one of my friends's birthday, now expanded into a full blown architecture of toy kernel development. It recreates a good chunk of libc/libcpp, which works along a kernel backend. Its quite a modern take, using an `UEFI` bootloader, and `docker` to create a simple development environment to work in. This project is marked as a template, so all you have to do is create an OS-TK project is hit the "Use Template" button.
 
-**NOTE: Not all features advertised are yet implemented.**
+**NOTE 1: Not all features advertised are yet implemented.**
+**NOTE 2: Old repository can be found [here](https://github.com/Hachem-H/OS-TK.bak)**
 
 ## Project structure
 ```sh
