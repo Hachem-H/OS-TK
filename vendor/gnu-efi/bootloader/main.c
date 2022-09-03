@@ -3,20 +3,11 @@
 #include <efilib.h>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
-#include "drivers/Display.h"
+#include "Drivers/Display.h"
+#include "Common/BootInfo.h"
 
 #define PSF1_MAGIC0 0x36
 #define PSF1_MAGIC1 0x04
-
-typedef struct BootInfo_t
-{
-	FrameBuffer* frameBuffer;
-	PSFFont* font;
-
-	EFI_MEMORY_DESCRIPTOR* memoryMap;
-	UINTN memoryMapSize;
-	UINTN descriptorSize;
-} BootInfo;
 
 static int memcmp(const void* lh, const void* rh, unsigned long long size)
 {

@@ -1,19 +1,11 @@
-#include "drivers/Display.h"
+#include "Drivers/Display.h"
 
 #include "Memory/PageFrameAllocator.h"
 #include "Memory/EFIMemory.h"
 #include "Memory/Bitmap.h"
 #include "Memory/Memory.h"
 
-typedef struct BootInfo_t
-{
-	FrameBuffer* frameBuffer;
-	PSFFont* font;
-
-	EFI_MEMORY_DESCRIPTOR* memoryMap;
-	uint64_t memoryMapSize;
-	uint64_t descriptorSize;
-} BootInfo;
+#include "Common/BootInfo.h"
 
 extern uint64_t KernelStart;
 extern uint64_t KernelEnd;
@@ -23,7 +15,10 @@ void _start(BootInfo* bootInfo)
     TextRenderer_InitWith(bootInfo->frameBuffer, bootInfo->font);
 
 	PageFrameAllocator pageFrameAllocator;
-	PageFrameAllocator_ReadEFIMemoryMap(&pageFrameAllocator, bootInfo->memoryMap, bootInfo->memoryMapSize, bootInfo->descriptorSize);
+	PageFrameAllocator_ReadEFIMemoryMap(&pageFrameAllocator, 
+										bootInfo->memoryMap, 
+										bootInfo->memoryMapSize, 
+										bootInfo->descriptorSize);
 
 	uint64_t kernelSize = &KernelEnd - &KernelStart;
 	uint64_t kernelPages = kernelSize/4096+1;

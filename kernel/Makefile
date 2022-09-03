@@ -8,7 +8,8 @@ LD = ld
 
 CC_FLAGS = -ffreestanding \
 		   -fshort-wchar  \
-		   -I../include
+		   -I../include   \
+		   -I$(SRC_DIR)
 LD_FLAGS = -T linker.ld \
 		   -Bsymbolic   \
 		   -nostdlib    \
@@ -50,6 +51,6 @@ build-img: kernel
 	mmd -i $(BIN_DIR)/$(OS_NAME).img ::/EFI
 	mmd -i $(BIN_DIR)/$(OS_NAME).img ::/EFI/BOOT
 	mcopy -i $(BIN_DIR)/$(OS_NAME).img $(BOOT_EFI) ::/EFI/BOOT
-	mcopy -i $(BIN_DIR)/$(OS_NAME).img startup.nsh ::
+	mcopy -i $(BIN_DIR)/$(OS_NAME).img $(EFS_DIR)/startup.nsh ::
 	mcopy -i $(BIN_DIR)/$(OS_NAME).img $(EFS_DIR)/zap-light16.psf ::
 	mcopy -i $(BIN_DIR)/$(OS_NAME).img $(BIN_DIR)/kernel.elf ::
