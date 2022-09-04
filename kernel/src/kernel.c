@@ -1,6 +1,8 @@
 #include "Drivers/Display.h"
 
-#include "Memory/PageFrameAllocator.h"
+#include "Paging/PageFrameAllocator.h"
+#include "Paging/PageTableManager.h"
+
 #include "Memory/EFIMemory.h"
 #include "Memory/Bitmap.h"
 #include "Memory/Memory.h"
@@ -10,34 +12,9 @@
 extern uint64_t KernelStart;
 extern uint64_t KernelEnd;
 
+extern void kmain();
 void _start(BootInfo* bootInfo)
 {
     TextRenderer_InitWith(bootInfo->frameBuffer, bootInfo->font);
-
-	PageFrameAllocator pageFrameAllocator;
-	PageFrameAllocator_ReadEFIMemoryMap(&pageFrameAllocator, 
-										bootInfo->memoryMap, 
-										bootInfo->memoryMapSize, 
-										bootInfo->descriptorSize);
-
-	uint64_t kernelSize = &KernelEnd - &KernelStart;
-	uint64_t kernelPages = kernelSize/4096+1;
-	PageFrameAllocator_LockPages(&pageFrameAllocator, &KernelStart, kernelPages);
-
-	TextRenderer_RenderText("Free RAM: ");
-	TextRenderer_RenderNumber(PageFrameAllocator_GetFreeRAM()/1024);
-	TextRenderer_RenderText(" KB\n");
-	TextRenderer_RenderText("Used RAM: ");
-	TextRenderer_RenderNumber(PageFrameAllocator_GetUsedRAM()/1024);
-	TextRenderer_RenderText(" KB\n");
-	TextRenderer_RenderText("Reserved RAM: ");
-	TextRenderer_RenderNumber(PageFrameAllocator_GetReservedRAM()/1024);
-	TextRenderer_RenderText(" KB\n\n");
-
-	for (int i = 0; i < 20; ++i)
-	{
-		void* address = PageFrameAllocator_RequestPage(&pageFrameAllocator);
-		TextRenderer_RenderHex64((uint64_t)address);
-		TextRenderer_RenderText("\n");
-	}
+    kmain();
 }

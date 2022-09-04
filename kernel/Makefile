@@ -6,9 +6,10 @@ OVMF_DIR    = ../vendor/OVMF
 CC = gcc
 LD = ld
 
-CC_FLAGS = -ffreestanding \
-		   -fshort-wchar  \
-		   -I../include   \
+CC_FLAGS = -I../lib/libc/include \
+           -ffreestanding        \
+		   -fshort-wchar         \
+     	   -I../include          \
 		   -I$(SRC_DIR)
 LD_FLAGS = -T linker.ld \
 		   -Bsymbolic   \
@@ -18,6 +19,9 @@ LD_FLAGS = -T linker.ld \
 SRC_DIR := src
 BIN_DIR := bin
 OBJ_DIR := bin-int
+
+LIBC_SRC_DIR := ../lib/libc/src
+LIBC_OBJ_DIR := bin-int
 EFS_DIR := fs-efi
 
 BOOT_EFI := $(GNU-EFI_DIR)/x86_64/bootloader/main.efi
@@ -26,8 +30,16 @@ SRCS = $(shell find src -name "*.c")
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 DIRS = $(dir $(OBJS))
 
+LIBC_SRCS = $(shell find $(LIBC_SRC_DIR) -name "*.c")          
+LIBC_OBJS = $(patsubst $(LIBC_SRC_DIR)/%.c,$(LIBC_OBJ_DIR)/%.o,$(LIBC_SRCS))
+LIBC_DIRS = $(dir $(LIBC_OBJS))
+
+CUSTOM_OBJS = $(shell find ../bin -name "*.o")
+
 $(OBJS): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
 	$(CC) $(CC_FLAGS) -c $(patsubst $(OBJ_DIR)/%.o,$(SRC_DIR)/%.c,$@) -o $@
+$(LIBC_OBJS): $(LIBC_OBJ_DIR)/%.o : $(LIBC_SRC_DIR)/%.c
+	$(CC) $(CC_FLAGS) -c $(patsubst $(LIBC_OBJ_DIR)/%.o,$(LIBC_SRC_DIR)/%.c,$@) -o $@
 
 env:
 	@mkdir -p $(BIN_DIR)
@@ -41,9 +53,9 @@ run:
 	                   -drive if=pflash,format=raw,unit=0,file="$(OVMF_DIR)/OVMF_CODE-pure-efi.fd",readonly=on \
 	                   -drive if=pflash,format=raw,unit=1,file="$(OVMF_DIR)/OVMF_VARS-pure-efi.fd",readonly=on
 
-kernel: env $(OBJS) link
+kernel: env $(OBJS) $(LIBC_OBJS) link
 link:
-	$(LD) $(LD_FLAGS) -o $(BIN_DIR)/kernel.elf $(OBJS)
+	$(LD) $(LD_FLAGS) -o $(BIN_DIR)/kernel.elf $(OBJS) $(CUSTOM_OBJS) $(LIBC_OBJS)
 
 build-img: kernel
 	dd if=/dev/zero of=$(BIN_DIR)/$(OS_NAME).img bs=512 count=93750
