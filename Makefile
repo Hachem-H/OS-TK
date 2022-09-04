@@ -1,19 +1,21 @@
 CC = gcc
 
-CC_FLAGS = -Iinclude/libc/include \
+LIBC_INCLUDE = include/libc/include
+
+CC_FLAGS = -I$(LIBC_INCLUDE) \
 		   -ffreestanding
 
 SRC_DIR := src
 OBJ_DIR := bin
 
-SRCS = $(shell find src -name "*.c")          
+SRCS = $(shell find $(SRC_DIR) -name "*.c")          
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 DIRS = $(dir $(OBJS))
 
 bootloader:
-	cd vendor/gnu-efi; make; make bootloader
+	cd vendor/gnu-efi; $(MAKE); $(MAKE) bootloader
 bootloader-clean:
-	cd vendor/gnu-efi; make clean; cd ../../
+	cd vendor/gnu-efi; $(MAKE) clean; cd ../../
 
 kernel-env:
 	@mkdir -p $(OBJ_DIR)
@@ -24,15 +26,13 @@ kernel-clean:
 kernel: kernel-env $(OBJS)
 
 kernel-backend: bootloader kernel 
-	cd kernel; make build-img
+	cd kernel; $(MAKE) build-img
 kernel-backend-clean:
-	cd kernel; make clean
+	cd kernel; $(MAKE) clean
 
-build: bootloader     \
-	   kernel         \
-	   kernel-backend
+build: kernel-backend
 emulate:
-	cd kernel; sudo make run
+	cd kernel; $(MAKE) run
 clean: kernel-backend-clean \
 	   bootloader-clean     \
        kernel-clean         \

@@ -7,24 +7,27 @@ ASM = nasm
 CC = gcc
 LD = ld
 
-CC_FLAGS = -I../lib/libc/include \
+LIBC_DIR     = ../lib/libc
+LIBC_INCLUDE = $(LIBC_DIR)/include
+GLOB_INCLUDE = ../include
+
+CC_FLAGS = -I$(LIBC_INCLUDE)     \
+     	   -I$(GLOB_INCLUDE)     \
            -ffreestanding        \
 		   -fshort-wchar         \
-     	   -I../include          \
 		   -I$(SRC_DIR)
+
 LD_FLAGS = -T linker.ld \
 		   -Bsymbolic   \
 		   -nostdlib    \
 		   -static
 
-SRC_DIR := src
-BIN_DIR := bin
-OBJ_DIR := bin-int
+LIBC_SRC_DIR := $(LIBC_DIR)/src
+SRC_DIR      := src
+BIN_DIR      := bin
+OBJ_DIR      := bin-int
 
-LIBC_SRC_DIR := ../lib/libc/src
-LIBC_OBJ_DIR := bin-int
-EFS_DIR := fs-efi
-
+EFS_DIR  := fs-efi
 BOOT_EFI := $(GNU-EFI_DIR)/x86_64/bootloader/main.efi
 
 SRCS = $(shell find src -name "*.c")          
@@ -36,7 +39,7 @@ ASM_OBJS = $(patsubst $(SRC_DIR)/%.asm,$(OBJ_DIR)/%.asm.o,$(ASM_SRCS))
 ASM_DIRS = $(dir $(ASM_OBJS))
 
 LIBC_SRCS = $(shell find $(LIBC_SRC_DIR) -name "*.c")          
-LIBC_OBJS = $(patsubst $(LIBC_SRC_DIR)/%.c,$(LIBC_OBJ_DIR)/%.o,$(LIBC_SRCS))
+LIBC_OBJS = $(patsubst $(LIBC_SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(LIBC_SRCS))
 LIBC_DIRS = $(dir $(LIBC_OBJS))
 
 CUSTOM_OBJS = $(shell find ../bin -name "*.o")
@@ -44,10 +47,10 @@ OBJECTS = $(OBJS) $(ASM_OBJS) $(LIBC_OBJS)
 
 $(OBJS): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
 	$(CC) $(CC_FLAGS) -c $(patsubst $(OBJ_DIR)/%.o,$(SRC_DIR)/%.c,$@) -o $@
+$(LIBC_OBJS): $(OBJ_DIR)/%.o : $(LIBC_SRC_DIR)/%.c
+	$(CC) $(CC_FLAGS) -c $(patsubst $(OBJ_DIR)/%.o,$(LIBC_SRC_DIR)/%.c,$@) -o $@
 $(ASM_OBJS): $(OBJ_DIR)/%.asm.o : $(SRC_DIR)/%.asm
 	$(ASM) -f elf64 $(patsubst $(OBJ_DIR)/%.asm.o,$(SRC_DIR)/%.asm,$@) -o $@
-$(LIBC_OBJS): $(LIBC_OBJ_DIR)/%.o : $(LIBC_SRC_DIR)/%.c
-	$(CC) $(CC_FLAGS) -c $(patsubst $(LIBC_OBJ_DIR)/%.o,$(LIBC_SRC_DIR)/%.c,$@) -o $@
 
 $(OBJ_DIR)/Core/Interrupts.o: $(SRC_DIR)/Core/Interrupts.c
 	$(CC) $(CC_FLAGS) -mno-red-zone -mgeneral-regs-only -c $(SRC_DIR)/Core/Interrupts.c -o $(OBJ_DIR)/Core/Interrupts.o
