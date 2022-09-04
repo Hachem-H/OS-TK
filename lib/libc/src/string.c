@@ -1,5 +1,6 @@
 #include "string.h"
 #include "stddef.h"
+#include "stdint.h"
 
 size_t strlen(char* buffer)
 {
@@ -148,18 +149,9 @@ int strncmp(const char* source1, const char* source2, size_t size)
 
 void* memset(void* src, char value, size_t size)
 {
-    char* pointer = (char*)src;
-    if (src == NULL)
-        return src;
-    
-    while (*pointer && size > 0)
-    {
-        *pointer = value;
-        pointer++;
-        size--;
-    }
-
-    return src;
+    for (uint64_t i = 0; i < size; i++)
+        *(uint8_t*)((uint64_t)src + i) = value;
+    return src+size;
 }
 
 void* memcpy(void* dest, const void* src, size_t n)

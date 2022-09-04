@@ -27,19 +27,21 @@ typedef struct FrameBuffer_t
 
 typedef struct TextRenderer_t
 {
-    FrameBuffer* frameBuffer;
     uint32_t color;
     PSFFont* font;
 } TextRenderer;
 
-void TextRenderer_InitWith(FrameBuffer* frameBuffer, PSFFont* font);
+void FrameBuffer_ClearColor(uint32_t color);
+void FrameBuffer_Clear();
+
+void TextRenderer_Init(PSFFont* font);
+void FrameBuffer_Init(FrameBuffer* frameBuffer);
 
 void TextRenderer_RenderChar(char character, uint32_t xOff, uint32_t yOff);
 void TextRenderer_RenderText(const char* string, uint32_t x, uint32_t y);
 
 void TextRenderer_SetFont(PSFFont* font);
 void TextRenderer_SetColor(uint32_t color);
-void TextRenderer_SetFrameBuffer(FrameBuffer* frameBuffer);
 
 uint32_t TextRenderer_GetWidth();
 uint32_t TextRenderer_GetHeight();

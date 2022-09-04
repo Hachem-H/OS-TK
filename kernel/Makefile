@@ -3,6 +3,7 @@ OS_NAME = OS-TK
 GNU-EFI_DIR = ../vendor/gnu-efi
 OVMF_DIR    = ../vendor/OVMF
  
+ASM = nasm
 CC = gcc
 LD = ld
 
@@ -30,14 +31,21 @@ SRCS = $(shell find src -name "*.c")
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 DIRS = $(dir $(OBJS))
 
+ASM_SRCS = $(shell find src -name "*.asm")          
+ASM_OBJS = $(patsubst $(SRC_DIR)/%.asm,$(OBJ_DIR)/%.asm.o,$(ASM_SRCS))
+ASM_DIRS = $(dir $(ASM_OBJS))
+
 LIBC_SRCS = $(shell find $(LIBC_SRC_DIR) -name "*.c")          
 LIBC_OBJS = $(patsubst $(LIBC_SRC_DIR)/%.c,$(LIBC_OBJ_DIR)/%.o,$(LIBC_SRCS))
 LIBC_DIRS = $(dir $(LIBC_OBJS))
 
 CUSTOM_OBJS = $(shell find ../bin -name "*.o")
+OBJECTS = $(OBJS) $(ASM_OBJS) $(LIBC_OBJS)
 
 $(OBJS): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
 	$(CC) $(CC_FLAGS) -c $(patsubst $(OBJ_DIR)/%.o,$(SRC_DIR)/%.c,$@) -o $@
+$(ASM_OBJS): $(OBJ_DIR)/%.asm.o : $(SRC_DIR)/%.asm
+	$(ASM) -f elf64 $(patsubst $(OBJ_DIR)/%.asm.o,$(SRC_DIR)/%.asm,$@) -o $@
 $(LIBC_OBJS): $(LIBC_OBJ_DIR)/%.o : $(LIBC_SRC_DIR)/%.c
 	$(CC) $(CC_FLAGS) -c $(patsubst $(LIBC_OBJ_DIR)/%.o,$(LIBC_SRC_DIR)/%.c,$@) -o $@
 
@@ -53,9 +61,9 @@ run:
 	                   -drive if=pflash,format=raw,unit=0,file="$(OVMF_DIR)/OVMF_CODE-pure-efi.fd",readonly=on \
 	                   -drive if=pflash,format=raw,unit=1,file="$(OVMF_DIR)/OVMF_VARS-pure-efi.fd",readonly=on
 
-kernel: env $(OBJS) $(LIBC_OBJS) link
+kernel: env $(OBJECTS) link
 link:
-	$(LD) $(LD_FLAGS) -o $(BIN_DIR)/kernel.elf $(OBJS) $(CUSTOM_OBJS) $(LIBC_OBJS)
+	$(LD) $(LD_FLAGS) -o $(BIN_DIR)/kernel.elf $(CUSTOM_OBJS) $(OBJECTS) 
 
 build-img: kernel
 	dd if=/dev/zero of=$(BIN_DIR)/$(OS_NAME).img bs=512 count=93750

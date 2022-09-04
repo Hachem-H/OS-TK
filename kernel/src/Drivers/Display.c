@@ -1,17 +1,31 @@
 #include "Display.h"
 
-static TextRenderer GlobalTextRenderer;
+#include <string.h>
 
-void TextRenderer_InitWith(FrameBuffer* frameBuffer, PSFFont* font)
+static TextRenderer GlobalTextRenderer;
+static FrameBuffer* GlobalFrameBuffer;
+
+void TextRenderer_Init(PSFFont* font)
 {
-    GlobalTextRenderer.frameBuffer = frameBuffer;
     GlobalTextRenderer.color = 0xFFFFFF;
     GlobalTextRenderer.font = font;
 }
 
+void FrameBuffer_Init(FrameBuffer* frameBuffer)
+{
+    GlobalFrameBuffer = frameBuffer;
+    FrameBuffer_Clear();
+}
+
+void FrameBuffer_Clear() { FrameBuffer_ClearColor(0x00); }
+void FrameBuffer_ClearColor(uint32_t color)
+{
+    memset(GlobalFrameBuffer->baseAddress, color, GlobalFrameBuffer->bufferSize);
+}
+
 void TextRenderer_RenderChar(char character, uint32_t xOff, uint32_t yOff)
 {
-    FrameBuffer* frameBuffer = GlobalTextRenderer.frameBuffer;
+    FrameBuffer* frameBuffer = GlobalFrameBuffer;
     PSFFont* font = GlobalTextRenderer.font;
 
     unsigned int* pixelPointer = (unsigned int*) frameBuffer->baseAddress;
@@ -36,7 +50,7 @@ void TextRenderer_RenderText(const char* string, uint32_t x, uint32_t y)
             TextRenderer_RenderChar(*stringPointer, x, y);
 
         x += 8;
-        if(x+8 > GlobalTextRenderer.frameBuffer->width) 
+        if(x+8 > GlobalFrameBuffer->width) 
         {
             x *= 0;
             y += 16;
@@ -45,9 +59,8 @@ void TextRenderer_RenderText(const char* string, uint32_t x, uint32_t y)
         stringPointer++;
     }
 }
-void TextRenderer_SetFont(PSFFont* font)                    { GlobalTextRenderer.font = font;               }
-void TextRenderer_SetColor(uint32_t color)                  { GlobalTextRenderer.color = color;             }
-void TextRenderer_SetFrameBuffer(FrameBuffer* frameBuffer)  { GlobalTextRenderer.frameBuffer = frameBuffer; }
+void TextRenderer_SetFont(PSFFont* font)    { GlobalTextRenderer.font = font;   }
+void TextRenderer_SetColor(uint32_t color)  { GlobalTextRenderer.color = color; }
 
-uint32_t TextRenderer_GetWidth()  { return GlobalTextRenderer.frameBuffer->width/8;   }
-uint32_t TextRenderer_GetHeight() { return GlobalTextRenderer.frameBuffer->height/16; }
+uint32_t TextRenderer_GetWidth()  { return GlobalFrameBuffer->width/8;   }
+uint32_t TextRenderer_GetHeight() { return GlobalFrameBuffer->height/16; }

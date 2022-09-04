@@ -1,5 +1,3 @@
-#include "Drivers/Display.h"
-
 #include "Paging/PageFrameAllocator.h"
 #include "Paging/PageTableManager.h"
 
@@ -7,7 +5,9 @@
 #include "Memory/Bitmap.h"
 #include "Memory/Memory.h"
 
+#include "Drivers/Display.h"
 #include "Common/BootInfo.h"
+#include "Descriptors/GDT.h"
 
 #include <stdbool.h>
 #include <string.h>
@@ -30,29 +30,35 @@ static void InitMemory(BootInfo* bootInfo)
     PageFrameAllocator_ReadEFIMemoryMap(bootInfo->memoryMap, bootInfo->memoryMapSize, bootInfo->descriptorSize);
     PageFrameAllocator_LockPages(&KernelStart, kernelPages);
 
-    PageTable* PML4 = (PageTable*)PageFrameAllocator_RequestPage();
-    memset(PML4, 0, 0x1000);
-    PageTableManager manager = { PML4 };
+    PageTable* pageTableMap4 = (PageTable*)PageFrameAllocator_RequestPage();
+    memset(pageTableMap4, 0, 0x1000);
+    PageTableManager manager = { pageTableMap4 };
 
     for (uint64_t t = 0; t < GetMemorySize(bootInfo->memoryMap, mMapEntries, bootInfo->descriptorSize); t+= 0x1000){
         PageTableManager_MapMemory(&manager, (void*)t, (void*)t);
     }
 
-    uint64_t fbBase = (uint64_t)bootInfo->frameBuffer->baseAddress;
-    uint64_t fbSize = (uint64_t)bootInfo->frameBuffer->bufferSize + 0x1000;
-    PageFrameAllocator_LockPages((void*)fbBase, fbSize/ 0x1000 + 1);
-    for (uint64_t t = fbBase; t < fbBase + fbSize; t += 4096){
-        PageTableManager_MapMemory(&manager, (void*)t, (void*)t);
+    uint64_t frameBufferBase = (uint64_t)bootInfo->frameBuffer->baseAddress;
+    uint64_t frameBufferSize = (uint64_t)bootInfo->frameBuffer->bufferSize + 0x1000;
+    PageFrameAllocator_LockPages((void*)frameBufferBase, frameBufferSize/ 0x1000 + 1);
+    for (uint64_t i = frameBufferBase; i < frameBufferBase + frameBufferSize; i += 4096){
+        PageTableManager_MapMemory(&manager, (void*)i, (void*)i);
     }
 
-    asm ("mov %0, %%cr3" : : "r" (PML4));
+    asm ("mov %0, %%cr3" : : "r" (pageTableMap4));
     Kernel.PageTableManager = manager;
 }
 
 void _start(BootInfo* bootInfo)
 {
+    GDTDescriptor gdtDescriptor;
+    gdtDescriptor.size = sizeof(GDT)-1;
+    gdtDescriptor.offset = (uint64_t)&GlobalDescriptorTable;
+    LoadGDT(&gdtDescriptor);   
+
     InitMemory(bootInfo);
-    TextRenderer_InitWith(bootInfo->frameBuffer, bootInfo->font);
+    FrameBuffer_Init(bootInfo->frameBuffer);
+    TextRenderer_Init(bootInfo->font);
 
     TextRenderer_RenderText("Kernel Initialized Successfully.", 0, 0);
     while (true);
