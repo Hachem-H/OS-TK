@@ -4,9 +4,10 @@
 
 #include <Drivers/Display.h>
 
-void putchar(const char character) { TextRenderer_RenderText(&character);  }
-void puts(const char* string)      { TextRenderer_RenderText(string);
-                                     TextRenderer_RenderText("\n");        }
+// Temporary coordinates
+void putchar(const char character) { TextRenderer_RenderText(&character, 0, 0);  }
+void puts(const char* string)      { TextRenderer_RenderText(string, 0, 0);
+                                     TextRenderer_RenderText("\n", 0, 0);        }
 
 void printf(const char* fmt, ...)
 {
@@ -25,19 +26,19 @@ void printf(const char* fmt, ...)
                 int number = va_arg(list, int);
                 char output[24] = {0};
                 itoa(number, output, 10); 
-                TextRenderer_RenderText(output);
+                TextRenderer_RenderText(output, 0, 0);
             } break;
 
             case 'c': {
                 char output = va_arg(list, int);
-                TextRenderer_RenderText(&output);
+                TextRenderer_RenderText(&output, 0, 0);
             } break;
             
             case 'x': {
                 int number = va_arg(list, int);
                 char output[24] = {0};
                 itoa(number, output, 16);
-                TextRenderer_RenderText(output);
+                TextRenderer_RenderText(output, 0, 0);
             } break;
 
             case 'X': {
@@ -50,23 +51,23 @@ void printf(const char* fmt, ...)
                         output[i] -= 'a';
                         output[i] += 'a';
                     }
-                TextRenderer_RenderText(output);
+                TextRenderer_RenderText(output, 0, 0);
             } break;
 
             case 'p': {
                 int number = va_arg(list, int);
                 char output[24] = {0};
                 itoa(number, output, 16);
-                TextRenderer_RenderText(output);
+                TextRenderer_RenderText(output, 0, 0);
             } break;
 
             case 's': {
                 char* output = va_arg(list, char*);
-                TextRenderer_RenderText(output);
+                TextRenderer_RenderText(output, 0, 0);
             } break;
 
             case '%': {
-                TextRenderer_RenderText("%");
+                TextRenderer_RenderText("%", 0, 0);
             } break;
             }
 
@@ -93,19 +94,19 @@ void vprintf(const char* fmt, va_list arg)
                 int number = va_arg(arg, int);
                 char output[24] = {0};
                 itoa(number, output, 10); 
-                TextRenderer_RenderText(output);
+                TextRenderer_RenderText(output, 0, 0);
             } break;
 
             case 'c': {
                 char output = va_arg(arg, int);
-                TextRenderer_RenderText(&output);
+                TextRenderer_RenderText(&output, 0, 0);
             } break;
             
             case 'x': {
                 int number = va_arg(arg, int);
                 char output[24] = {0};
                 itoa(number, output, 16);
-                TextRenderer_RenderText(output);
+                TextRenderer_RenderText(output, 0, 0);
             } break;
 
             case 'X': {
@@ -118,23 +119,23 @@ void vprintf(const char* fmt, va_list arg)
                         output[i] -= 'a';
                         output[i] += 'a';
                     }
-                TextRenderer_RenderText(output);
+                TextRenderer_RenderText(output, 0, 0);
             } break;
 
             case 'p': {
                 int number = va_arg(arg, int);
                 char output[24] = {0};
                 itoa(number, output, 16);
-                TextRenderer_RenderText(output);
+                TextRenderer_RenderText(output, 0, 0);
             } break;
 
             case 's': {
                 char* output = va_arg(arg, char*);
-                TextRenderer_RenderText(output);
+                TextRenderer_RenderText(output, 0, 0);
             } break;
 
             case '%': {
-                TextRenderer_RenderText("%");
+                TextRenderer_RenderText("%", 0, 0);
             } break;
             }
 
