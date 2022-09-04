@@ -49,6 +49,9 @@ $(ASM_OBJS): $(OBJ_DIR)/%.asm.o : $(SRC_DIR)/%.asm
 $(LIBC_OBJS): $(LIBC_OBJ_DIR)/%.o : $(LIBC_SRC_DIR)/%.c
 	$(CC) $(CC_FLAGS) -c $(patsubst $(LIBC_OBJ_DIR)/%.o,$(LIBC_SRC_DIR)/%.c,$@) -o $@
 
+$(OBJ_DIR)/Core/Interrupts.o: $(SRC_DIR)/Core/Interrupts.c
+	$(CC) $(CC_FLAGS) -mno-red-zone -mgeneral-regs-only -c $(SRC_DIR)/Core/Interrupts.c -o $(OBJ_DIR)/Core/Interrupts.o
+
 env:
 	@mkdir -p $(BIN_DIR)
 	@mkdir -p $(OBJ_DIR)

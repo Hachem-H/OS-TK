@@ -5,9 +5,12 @@
 #include "Memory/Bitmap.h"
 #include "Memory/Memory.h"
 
+#include "Descriptors/GDT.h"
+#include "Descriptors/IDT.h"
+
 #include "Drivers/Display.h"
 #include "Common/BootInfo.h"
-#include "Descriptors/GDT.h"
+#include "Core/Interrupts.h"
 
 #include <stdbool.h>
 #include <string.h>
@@ -49,6 +52,20 @@ static void InitMemory(BootInfo* bootInfo)
     Kernel.PageTableManager = manager;
 }
 
+static IDTRegister idtRegister;
+static void InstallInterrupts()
+{
+    idtRegister.limit = 0x0FFF;
+    idtRegister.offset = (uint64_t)PageFrameAllocator_RequestPage();
+
+    IDTEntry* pageFaultInterrupt = (IDTEntry*)(idtRegister.offset + 0xE * sizeof(IDTEntry));
+    IDTEntry_SetOffset(pageFaultInterrupt, (uint64_t)PageFault_Handler);
+    pageFaultInterrupt->typeAttribute = IDT_TypeAttribute_InterruptGate;
+    pageFaultInterrupt->selector = 0x08;
+
+    asm ("lidt %0" : : "m" (idtRegister));
+}
+
 void _start(BootInfo* bootInfo)
 {
     GDTDescriptor gdtDescriptor;
@@ -57,9 +74,9 @@ void _start(BootInfo* bootInfo)
     LoadGDT(&gdtDescriptor);   
 
     InitMemory(bootInfo);
+    InstallInterrupts();
+
     FrameBuffer_Init(bootInfo->frameBuffer);
     TextRenderer_Init(bootInfo->font);
-
-    TextRenderer_RenderText("Kernel Initialized Successfully.", 0, 0);
-    while (true);
+    kmain();
 }
