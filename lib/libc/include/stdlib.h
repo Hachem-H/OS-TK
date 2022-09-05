@@ -30,3 +30,6 @@ ldiv_t ldiv(long int number, long int denom);
 
 int rand();
 void srand(unsigned int seed);
+
+void* malloc(size_t size);
+void free(void* address);

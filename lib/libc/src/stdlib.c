@@ -3,6 +3,8 @@
 #include "stddef.h"
 #include "ctype.h"
 
+#include "Memory/Heap.h"
+
 static unsigned long int next = 1;
 
 char* itoa(int number, char* output, int base)
@@ -167,4 +169,14 @@ int rand()
 void srand(unsigned int seed)
 {
     next = seed;
+}
+
+void free(void* address)
+{
+    HeapFree(address);
+}
+
+void* malloc(size_t size)
+{
+    return HeapAllocate(size);
 }

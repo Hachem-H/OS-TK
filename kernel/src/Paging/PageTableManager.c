@@ -3,6 +3,8 @@
 
 #include <string.h>
 
+PageTableManager GlobalPageTableManager;
+
 void InitPageMapIndex(PageMapIndexer* indexer, uint64_t virtualAddress)
 {
     virtualAddress >>= 12;
@@ -41,7 +43,7 @@ uint64_t PageDirectoryEntry_GetAddress(PageDirectoryEntry* entry)
     return (entry->value & 0x000ffffffffff000) >> 12;
 }
 
-void PageTableManager_MapMemory(PageTableManager* pageTableManager, void* virtualMemory, void* physicalMemory)
+void PageTableManager_MapMemory(void* virtualMemory, void* physicalMemory)
 {
     PageMapIndexer indexer;
     InitPageMapIndex(&indexer, (uint64_t) virtualMemory);
@@ -51,7 +53,7 @@ void PageTableManager_MapMemory(PageTableManager* pageTableManager, void* virtua
     PageTable* PT;
     PageTable* PD;
 
-    PDE = pageTableManager->pageTableMap4->entries[indexer.pageDirectoryPointer];
+    PDE = GlobalPageTableManager.pageTableMap4->entries[indexer.pageDirectoryPointer];
     if (!PageDirectoryEntry_GetFlag(&PDE, PageDirectoryFlags_Present))
     {
         PDP = (PageTable*)PageFrameAllocator_RequestPage();
@@ -59,7 +61,7 @@ void PageTableManager_MapMemory(PageTableManager* pageTableManager, void* virtua
         PageDirectoryEntry_SetAddress(&PDE, (uint64_t)PDP >> 12);
         PageDirectoryEntry_SetFlag(&PDE, PageDirectoryFlags_Present, true);
         PageDirectoryEntry_SetFlag(&PDE, PageDirectoryFlags_ReadWrite, true);
-        pageTableManager->pageTableMap4->entries[indexer.pageDirectoryPointer] = PDE;
+        GlobalPageTableManager.pageTableMap4->entries[indexer.pageDirectoryPointer] = PDE;
     }
     else
         PDP = (PageTable*)((uint64_t)PageDirectoryEntry_GetAddress(&PDE) << 12);

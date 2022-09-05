@@ -1,3 +1,5 @@
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include "Keyboard.h"
 #include "Display.h"
 #include "stdlib.h"
@@ -22,18 +24,10 @@ static struct KeyboardState_t
 
 void Keyboard_OnRelease(uint32_t scanCode)
 {
-    char character = KeyboardTranslator(scanCode, KeyboardState.isLeftShift | KeyboardState.isRightShift);
-    TextRenderer_RenderText("Keyboard OnRelease, character = ", 0, 0);
-    if (character) 
-        TextRenderer_RenderChar(character, 32, 0);
 }
 
 void Keyboard_OnPress(uint32_t scanCode)
 {
-    char character = KeyboardTranslator(scanCode, KeyboardState.isLeftShift | KeyboardState.isRightShift);
-    TextRenderer_RenderText("Keyboard OnPress, character = ", 0, 0);
-    if (character) 
-        TextRenderer_RenderChar(character, 30, 0);
 }
 
 void KeyboardHandler(uint32_t scanCode)
@@ -46,7 +40,6 @@ void KeyboardHandler(uint32_t scanCode)
     case RightShift+0x80: KeyboardState.isRightShift = false; break;
     }
 
-    FrameBuffer_ClearColor(0);
     if ((int)scanCode - 0x80 < 0)
         Keyboard_OnPress(scanCode);
     else 

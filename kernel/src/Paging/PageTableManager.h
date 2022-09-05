@@ -40,6 +40,7 @@ typedef struct PageTableManager_t
 {
     PageTable* pageTableMap4;
 } PageTableManager;
+extern PageTableManager GlobalPageTableManager;
 
 void     PageDirectoryEntry_SetFlag(PageDirectoryEntry* entry, PageDirectoryFlag flag, bool enabled);
 void     PageDirectoryEntry_SetAddress(PageDirectoryEntry* entry, uint64_t address);
@@ -47,4 +48,4 @@ bool     PageDirectoryEntry_GetFlag(PageDirectoryEntry* entry, PageDirectoryFlag
 uint64_t PageDirectoryEntry_GetAddress(PageDirectoryEntry* entry);
 
 void InitPageMapIndex(PageMapIndexer* indexer, uint64_t virtualAddress);
-void PageTableManager_MapMemory(PageTableManager* pageTableManager, void* virtualMemory, void* physicalMemory);
+void PageTableManager_MapMemory(void* virtualMemory, void* physicalMemory);
