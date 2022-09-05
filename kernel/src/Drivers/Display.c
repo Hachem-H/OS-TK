@@ -19,7 +19,18 @@ void FrameBuffer_Init(FrameBuffer* frameBuffer)
 
 void FrameBuffer_ClearColor(uint32_t color)
 {
-    memset(GlobalFrameBuffer->baseAddress, color, GlobalFrameBuffer->bufferSize);
+    uint64_t frameBufferBase = (uint64_t)GlobalFrameBuffer->baseAddress;
+    uint64_t bytesPerScanline = GlobalFrameBuffer->pixelsPerScanLine * 4;
+    uint64_t frameBufferHeight = GlobalFrameBuffer->height;
+
+    for (uint64_t verticalScanline = 0; verticalScanline < frameBufferHeight; verticalScanline ++)
+    {
+        uint64_t pixelPointerBase = frameBufferBase + (bytesPerScanline * verticalScanline);
+        for (uint32_t* pixelPointer = (uint32_t*)pixelPointerBase;
+             pixelPointer < (uint32_t*)(pixelPointerBase + bytesPerScanline); 
+             pixelPointer++)
+            *pixelPointer = color;
+    }
 }
 
 void TextRenderer_RenderChar(char character, uint32_t xOff, uint32_t yOff)
@@ -43,6 +54,9 @@ void TextRenderer_RenderChar(char character, uint32_t xOff, uint32_t yOff)
 void TextRenderer_RenderText(const char* string, uint32_t x, uint32_t y)
 {
     const char* stringPointer = string;
+    x *= 8;
+    y *= 16;
+    
     while (*stringPointer != 0x00)
     {
         if (*stringPointer != '\n')

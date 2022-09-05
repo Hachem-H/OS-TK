@@ -19,9 +19,9 @@ typedef struct IDTEntry_t
 
 typedef struct IDTRegister_t
 {
-    uint64_t limit;
+    uint16_t limit;
     uint64_t offset;
-} __attribute__((packed)) IDTRegister;
+}  __attribute__((packed)) IDTRegister;
 
 void IDTEntry_SetOffset(IDTEntry* entry, uint64_t offset);
 uint64_t IDTEntry_GetOffset(IDTEntry* entry);

@@ -1,7 +1,18 @@
 #pragma once
 
-struct InterruptFrame;
+typedef struct InterruptFrame_t InterruptFrame;
 
-__attribute__((interrupt)) void PageFault_Handler(struct InterruptFrame* frame);
-__attribute__((interrupt)) void DoubleFault_Handler(struct InterruptFrame* frame);
-__attribute__((interrupt)) void GeneralProtectionFault_Handler(struct InterruptFrame* frame);
+#define INTERRUPT_HANDLER(name)              \
+    __attribute__((interrupt))               \
+    void name##_Handler(InterruptFrame* frame)
+
+#define PANIC_HANDLER(name, message) \
+    INTERRUPT_HANDLER(name)          \
+    {                                \
+        Panic(message);              \
+    }                                \
+
+INTERRUPT_HANDLER(PageFault);
+INTERRUPT_HANDLER(DoubleFault);
+INTERRUPT_HANDLER(KeyboardInterrupt);
+INTERRUPT_HANDLER(GeneralProtectionFault);

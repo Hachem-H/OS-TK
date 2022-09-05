@@ -72,11 +72,16 @@ static void ISRInstall()
     Kernel.idtRegister.limit = 0x0FFF;
     Kernel.idtRegister.offset = (uint64_t)PageFrameAllocator_RequestPage();
 
-    SetIDTGate((void*)PageFault_Handler, 0xE, IDT_TypeAttribute_InterruptGate);
-    SetIDTGate((void*)DoubleFault_Handler, 0x8, IDT_TypeAttribute_InterruptGate);
-    SetIDTGate((void*)GeneralProtectionFault_Handler, 0xE, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)PageFault_Handler,              0x0E, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)DoubleFault_Handler,            0x08, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)KeyboardInterrupt_Handler,      0x21, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)GeneralProtectionFault_Handler, 0x0E, IDT_TypeAttribute_InterruptGate);
 
     asm ("lidt %0" : : "m" (Kernel.idtRegister));
+    RemapPIC();
+    outportb(PIC1_DATA, 0b11111101);
+    outportb(PIC2_DATA, 0b11111111);
+    asm ("sti");
 }
 
 void _start(BootInfo* bootInfo)
@@ -92,7 +97,5 @@ void _start(BootInfo* bootInfo)
     InitMemory(bootInfo);
     ISRInstall();
   
-    asm("int $0x0E");
-
     for (;;);
 }
