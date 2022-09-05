@@ -3,6 +3,7 @@ ENTRY(_start)
 
 SECTIONS
 {
+    . = 0x1000;
 	KernelStart = .;
 
 	.text : ALIGN(0x1000)

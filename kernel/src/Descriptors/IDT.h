@@ -15,7 +15,7 @@ typedef struct IDTEntry_t
     uint16_t offset1;
     uint32_t offset2;
     uint32_t ignore;
-} IDTEntry;
+} __attribute__((packed)) IDTEntry;
 
 typedef struct IDTRegister_t
 {

@@ -59,38 +59,24 @@ static void InitMemory(BootInfo* bootInfo)
     Kernel.PageTableManager = &pageTableManager;
 }
 
-static void InstallInterrupts()
+static void SetIDTGate(void* handler, uint8_t entryOffset, uint8_t typeAttribute)
+{
+    IDTEntry* interrupt = (IDTEntry*)(Kernel.idtRegister.offset + entryOffset * sizeof(IDTEntry));
+    IDTEntry_SetOffset(interrupt, (uint64_t) handler);
+    interrupt->typeAttribute = typeAttribute;
+    interrupt->selector =  0x08;
+}
+
+static void ISRInstall()
 {
     Kernel.idtRegister.limit = 0x0FFF;
     Kernel.idtRegister.offset = (uint64_t)PageFrameAllocator_RequestPage();
 
-    IDTEntry* pageFaultInterrupt = (IDTEntry*)(Kernel.idtRegister.offset + 0xE * sizeof(IDTEntry));
-    IDTEntry_SetOffset(pageFaultInterrupt, (uint64_t)PageFault_Handler);
-    pageFaultInterrupt->typeAttribute = IDT_TypeAttribute_InterruptGate;
-    pageFaultInterrupt->selector = 0x08;
-
-    IDTEntry* doubleFaultInterrupt = (IDTEntry*)(Kernel.idtRegister.offset + 0x8 * sizeof(IDTEntry));
-    IDTEntry_SetOffset(doubleFaultInterrupt, (uint64_t)DoubleFault_Handler);
-    doubleFaultInterrupt->typeAttribute = IDT_TypeAttribute_InterruptGate;
-    doubleFaultInterrupt->selector = 0x08;
-
-    IDTEntry* GPFaultInterrupt = (IDTEntry*)(Kernel.idtRegister.offset + 0xD * sizeof(IDTEntry));
-    IDTEntry_SetOffset(GPFaultInterrupt, (uint64_t)GeneralProtectionFault_Handler);
-    GPFaultInterrupt->typeAttribute = IDT_TypeAttribute_InterruptGate;
-    GPFaultInterrupt->selector = 0x08;
-
-    IDTEntry* keyboardInterrupt = (IDTEntry*)(Kernel.idtRegister.offset + 0x21 * sizeof(IDTEntry));
-    IDTEntry_SetOffset(keyboardInterrupt, (uint64_t)GeneralProtectionFault_Handler);
-    keyboardInterrupt->typeAttribute = IDT_TypeAttribute_InterruptGate;
-    keyboardInterrupt->selector = 0x08;
+    SetIDTGate((void*)PageFault_Handler, 0xE, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)DoubleFault_Handler, 0x8, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)GeneralProtectionFault_Handler, 0xE, IDT_TypeAttribute_InterruptGate);
 
     asm ("lidt %0" : : "m" (Kernel.idtRegister));
-
-    RemapPIC();
-    outportb(PIC1_DATA, 0b11111101);
-    outportb(PIC2_DATA, 0b11111111);
-
-    asm ("sti");
 }
 
 void _start(BootInfo* bootInfo)
@@ -104,8 +90,9 @@ void _start(BootInfo* bootInfo)
     LoadGDT(&gdtDescriptor);   
 
     InitMemory(bootInfo);
-    //InstallInterrupts();
-    
-    FrameBuffer_ClearColor(0xFFFFFF);
+    ISRInstall();
+  
+    asm("int $0x0E");
+
     for (;;);
 }

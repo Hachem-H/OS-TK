@@ -47,12 +47,12 @@ CUSTOM_OBJS = $(shell find ../bin -name "*.o")
 OBJECTS = $(OBJS) $(ASM_OBJS) $(LIBC_OBJS)
 
 $(OBJS): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
-	$(CC) $(CC_FLAGS) -nostdlib -c $(patsubst $(OBJ_DIR)/%.o,$(SRC_DIR)/%.c,$@) -o $@
-$(LIBC_OBJS): $(OBJ_DIR)/%.o : $(LIBC_SRC_DIR)/%.c
-	$(CC) $(CC_FLAGS) -c $(patsubst $(OBJ_DIR)/%.o,$(LIBC_SRC_DIR)/%.c,$@) -o $@
+	$(CC) $(CC_FLAGS) -c $(patsubst $(OBJ_DIR)/%.o,$(SRC_DIR)/%.c,$@) -o $@
 $(ASM_OBJS): $(OBJ_DIR)/%.asm.o : $(SRC_DIR)/%.asm
 	$(ASM) -f elf64 $(patsubst $(OBJ_DIR)/%.asm.o,$(SRC_DIR)/%.asm,$@) -o $@
 
+$(LIBC_OBJS): $(OBJ_DIR)/%.o : $(LIBC_SRC_DIR)/%.c
+	$(CC) $(CC_FLAGS) -c $(patsubst $(OBJ_DIR)/%.o,$(LIBC_SRC_DIR)/%.c,$@) -o $@
 $(OBJ_DIR)/Core/Interrupts.o: $(SRC_DIR)/Core/Interrupts.c
 	$(CC) $(CC_FLAGS) -mno-red-zone -mgeneral-regs-only -c $(SRC_DIR)/Core/Interrupts.c -o $(OBJ_DIR)/Core/Interrupts.o
 
@@ -64,8 +64,8 @@ clean:
 	@rm -rf $(BIN_DIR)
 	@rm -rf $(OBJ_DIR)
 run:
-	qemu-system-x86_64 -drive file=$(BIN_DIR)/$(OS_NAME).img,format=raw -m 256M -cpu qemu64 -net none          \
-	                   -drive if=pflash,format=raw,unit=0,file="$(OVMF_DIR)/OVMF_CODE-pure-efi.fd",readonly=on \
+	qemu-system-x86_64 -drive file=$(BIN_DIR)/$(OS_NAME).img,format=raw -m 256M -machine q35 -cpu qemu64 -net none \
+	                   -drive if=pflash,format=raw,unit=0,file="$(OVMF_DIR)/OVMF_CODE-pure-efi.fd",readonly=on     \
 	                   -drive if=pflash,format=raw,unit=1,file="$(OVMF_DIR)/OVMF_VARS-pure-efi.fd",readonly=on
 
 kernel: env $(OBJECTS) link
