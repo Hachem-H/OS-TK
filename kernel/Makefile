@@ -11,10 +11,11 @@ LIBC_DIR     = ../lib/libc
 LIBC_INCLUDE = $(LIBC_DIR)/include
 GLOB_INCLUDE = ../include
 
-CC_FLAGS = -I$(LIBC_INCLUDE)     \
-     	   -I$(GLOB_INCLUDE)     \
-           -ffreestanding        \
-		   -fshort-wchar         \
+CC_FLAGS = -I$(LIBC_INCLUDE) \
+     	   -I$(GLOB_INCLUDE) \
+           -ffreestanding    \
+		   -fshort-wchar     \
+		   -Wall -Wextra     \
 		   -I$(SRC_DIR)
 
 LD_FLAGS = -T linker.ld \
@@ -46,7 +47,7 @@ CUSTOM_OBJS = $(shell find ../bin -name "*.o")
 OBJECTS = $(OBJS) $(ASM_OBJS) $(LIBC_OBJS)
 
 $(OBJS): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
-	$(CC) $(CC_FLAGS) -c $(patsubst $(OBJ_DIR)/%.o,$(SRC_DIR)/%.c,$@) -o $@
+	$(CC) $(CC_FLAGS) -nostdlib -c $(patsubst $(OBJ_DIR)/%.o,$(SRC_DIR)/%.c,$@) -o $@
 $(LIBC_OBJS): $(OBJ_DIR)/%.o : $(LIBC_SRC_DIR)/%.c
 	$(CC) $(CC_FLAGS) -c $(patsubst $(OBJ_DIR)/%.o,$(LIBC_SRC_DIR)/%.c,$@) -o $@
 $(ASM_OBJS): $(OBJ_DIR)/%.asm.o : $(SRC_DIR)/%.asm

@@ -2,13 +2,13 @@
 
 #include "stdint.h"
 
-typedef struct GDTDescriptor_t
+typedef struct GDTDescriptor_t 
 {
     uint16_t size;
     uint64_t offset;
 } __attribute__((packed)) GDTDescriptor;
 
-typedef struct GDTEntry_t
+typedef struct GDTEntry_t 
 {
     uint16_t limit0;
     uint16_t base0;
@@ -26,7 +26,8 @@ typedef struct GDT_t
     GDTEntry userNull;
     GDTEntry userCode;
     GDTEntry userData;
-} __attribute__((packed)) __attribute((aligned(0x1000))) GDT;
+} __attribute__((packed)) 
+  __attribute__((aligned(0x1000))) GDT;
 
 extern GDT GlobalDescriptorTable;
 extern void LoadGDT(GDTDescriptor* gdtDescriptor);

@@ -149,7 +149,7 @@ int strncmp(const char* source1, const char* source2, size_t size)
 
 void* memset(void* src, char value, size_t size)
 {
-    for (uint64_t i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
         *(uint8_t*)((uint64_t)src + i) = value;
     return src+size;
 }

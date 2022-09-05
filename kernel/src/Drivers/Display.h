@@ -32,7 +32,6 @@ typedef struct TextRenderer_t
 } TextRenderer;
 
 void FrameBuffer_ClearColor(uint32_t color);
-void FrameBuffer_Clear();
 
 void TextRenderer_Init(PSFFont* font);
 void FrameBuffer_Init(FrameBuffer* frameBuffer);

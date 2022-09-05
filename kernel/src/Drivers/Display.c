@@ -14,10 +14,9 @@ void TextRenderer_Init(PSFFont* font)
 void FrameBuffer_Init(FrameBuffer* frameBuffer)
 {
     GlobalFrameBuffer = frameBuffer;
-    FrameBuffer_Clear();
+    FrameBuffer_ClearColor(0x00);
 }
 
-void FrameBuffer_Clear() { FrameBuffer_ClearColor(0x00); }
 void FrameBuffer_ClearColor(uint32_t color)
 {
     memset(GlobalFrameBuffer->baseAddress, color, GlobalFrameBuffer->bufferSize);

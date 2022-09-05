@@ -11,8 +11,6 @@ typedef struct PageFrameAllocator_t
     Bitmap pageBitMap;
 } PageFrameAllocator;
 
-void SetGlobalPageFrameAllocator(PageFrameAllocator* allocator);
-
 void PageFrameAllocator_ReadEFIMemoryMap(EFI_MEMORY_DESCRIPTOR* memoryMap, 
                                          size_t memoryMapSize, size_t descriptorSize);
 void PageFrameAllocator_InitBitmap(size_t bitmapSize, void* bufferAddress);
