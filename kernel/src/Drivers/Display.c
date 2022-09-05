@@ -41,6 +41,9 @@ void TextRenderer_RenderChar(char character, uint32_t xOff, uint32_t yOff)
     unsigned int* pixelPointer = (unsigned int*) frameBuffer->baseAddress;
     char* fontPointer = (char*)font->glyphBuffer+character*font->header->charSize;
 
+    xOff *= 8;
+    yOff *= 16;
+
     for (unsigned long y = yOff; y < yOff+16; ++y)
     {
         for (unsigned long x = xOff;  x < xOff+8; ++x)
@@ -54,19 +57,17 @@ void TextRenderer_RenderChar(char character, uint32_t xOff, uint32_t yOff)
 void TextRenderer_RenderText(const char* string, uint32_t x, uint32_t y)
 {
     const char* stringPointer = string;
-    x *= 8;
-    y *= 16;
-    
+
     while (*stringPointer != 0x00)
     {
         if (*stringPointer != '\n')
             TextRenderer_RenderChar(*stringPointer, x, y);
 
-        x += 8;
+        x++;
         if(x+8 > GlobalFrameBuffer->width) 
         {
             x *= 0;
-            y += 16;
+            y ++;
         }
 
         stringPointer++;
