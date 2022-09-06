@@ -2,4 +2,5 @@
 
 void kmain()
 {
+    puts("Hello World!");
 }

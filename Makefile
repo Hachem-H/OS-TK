@@ -12,6 +12,11 @@ SRCS = $(shell find $(SRC_DIR) -name "*.c")
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 DIRS = $(dir $(OBJS))
 
+mtools:
+	cd vendor/mtools; ./configure; $(MAKE)
+mtools-clean:
+	cd vendor/mtools; $(MAKE)
+
 bootloader:
 	cd vendor/gnu-efi; $(MAKE); $(MAKE) bootloader
 bootloader-clean:
@@ -35,6 +40,7 @@ emulate:
 	cd kernel; $(MAKE) run
 clean: kernel-backend-clean \
 	   bootloader-clean     \
+	   mtools-clean         \
        kernel-clean         \
 
 $(OBJS): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c

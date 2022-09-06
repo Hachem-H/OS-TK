@@ -6,7 +6,6 @@ RUN apt-get upgrade -y
 RUN apt-get install binutils -y
 RUN apt-get install mkisofs -y
 RUN apt-get install xorriso -y
-RUN apt-get install mtools -y
 RUN apt-get install make -y
 RUN apt-get install nasm -y
 RUN apt-get install gcc -y
