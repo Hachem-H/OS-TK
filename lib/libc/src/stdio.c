@@ -3,10 +3,31 @@
 #include "string.h"
 
 #include <Drivers/Console.h>
+#include <Drivers/Keyboard.h>
+
+static FILE stdoutTEMP;
+static FILE stderrTEMP;
+static FILE stdinTEMP;
+
+FILE* stdout = &stdoutTEMP;
+FILE* stderr = &stderrTEMP;
+FILE* stdin  = &stdinTEMP; 
 
 void putchar(const char character) { Console_PutChar(character); }
 void puts(const char* string)      { Console_PrintString(string);
                                      Console_NewLine();          }
+
+void fputchar(FILE* file, const char character)
+{
+    if (file == stdout || file == stderr)
+        putchar(character);
+}
+
+void fputs(FILE* file, const char* string)
+{
+    if (file == stdout || file == stderr)
+        puts(string);
+}
 
 void printf(const char* fmt, ...)
 {
@@ -80,6 +101,12 @@ void printf(const char* fmt, ...)
     va_end(list);
 }
 
+void fprintf(FILE* file, const char* fmt, ...)
+{
+    if (file == stdout || file == stderr)
+        printf(fmt);
+}
+
 void vprintf(const char* fmt, va_list arg)
 {
     for (int i = 0; i < strlen((char*)fmt); i++)
@@ -144,6 +171,12 @@ void vprintf(const char* fmt, va_list arg)
         
         putchar(fmt[i]);
     }
+}
+
+void vfprintf(FILE* file, const char* fmt, va_list arg)
+{
+    if (file == stdout || file == stderr)
+        vprintf(fmt, arg);
 }
 
 void sprintf(char* string, const char* fmt, ...)
@@ -302,3 +335,9 @@ void vsprintf(char* string, const char* fmt, va_list arg)
     }
 }
 
+// --------------------------------- //
+
+char fgetchar()
+{
+    return KeyboardReadChar();
+}

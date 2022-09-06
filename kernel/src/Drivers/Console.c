@@ -75,11 +75,26 @@ void Console_PutChar(const char character)
         return;
     }
 
+    if (character == '\b')
+    {
+        Console_DeleteChar();
+        return;
+    }
+
     if (Console.x >= Console.width)
         Console_NewLine();
     
     PutChar(character, Console.x, Console.height-1);
     Console.x++;
+}
+
+void Console_DeleteChar()
+{
+    if (Console.x > 0)
+    {
+        Console.x -= 1;
+        PutChar(' ', Console.x, Console.height-1);
+    }
 }
 
 void Console_PrintString(const char* string)

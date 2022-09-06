@@ -1,7 +1,7 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include "Keyboard.h"
-#include "Display.h"
+#include "Console.h"
 
 #include <stdlib.h>
 
@@ -21,6 +21,9 @@ static struct KeyboardState_t
 {
     bool isLeftShift;
     bool isRightShift;
+
+    bool isRead;
+    char buffer;
 } KeyboardState = {0};
 
 void Keyboard_OnRelease(uint32_t scanCode)
@@ -29,16 +32,22 @@ void Keyboard_OnRelease(uint32_t scanCode)
 
 void Keyboard_OnPress(uint32_t scanCode)
 {
+    KeyboardState.buffer = KeyboardTranslator(scanCode, KeyboardState.isLeftShift | KeyboardState.isRightShift);
+    if (KeyboardState.isRead && KeyboardState.buffer != 0)
+    {
+        Console_PutChar(KeyboardState.buffer);
+        KeyboardState.isRead = false;
+    }
 }
 
 void KeyboardHandler(uint32_t scanCode)
 {
     switch (scanCode)
     {
-    case LeftShift:       KeyboardState.isLeftShift  = true;  break;
-    case LeftShift+0x80:  KeyboardState.isLeftShift  = false; break;
-    case RightShift:      KeyboardState.isRightShift = true;  break;
-    case RightShift+0x80: KeyboardState.isRightShift = false; break;
+    case LeftShift:       KeyboardState.isLeftShift  = true;  return;
+    case LeftShift+0x80:  KeyboardState.isLeftShift  = false; return;
+    case RightShift:      KeyboardState.isRightShift = true;  return;
+    case RightShift+0x80: KeyboardState.isRightShift = false; return;
     }
 
     if ((int)scanCode - 0x80 < 0)
@@ -51,7 +60,20 @@ char KeyboardTranslator(uint32_t scanCode, bool upper)
 {
     if (scanCode > 58)
         return 0;
+
+    if (scanCode == 0x1C)
+        return '\n';
+    if (scanCode == 0x0E)
+        return '\b';
+
     if (upper)
         return ASCIIKeys[scanCode] - ' ';
     return ASCIIKeys[scanCode];
+}
+
+char KeyboardReadChar()
+{
+    KeyboardState.isRead = true;
+    while (KeyboardState.isRead);
+    return KeyboardState.buffer;
 }
