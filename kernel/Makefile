@@ -2,6 +2,7 @@ OS_NAME = OS-TK
 
 GNU-EFI_DIR = ../vendor/gnu-efi
 OVMF_DIR    = ../vendor/OVMF
+MTOOLS_DIR  = ../vendor/mtools
  
 ASM = nasm
 CC = gcc
@@ -75,13 +76,13 @@ link:
 
 build-img: kernel
 	dd if=/dev/zero of=$(BIN_DIR)/$(OS_NAME).img bs=512 count=93750
-	mformat -i $(BIN_DIR)/$(OS_NAME).img -f 1440 ::
-	mmd -i $(BIN_DIR)/$(OS_NAME).img ::/EFI
-	mmd -i $(BIN_DIR)/$(OS_NAME).img ::/EFI/BOOT
-	mcopy -i $(BIN_DIR)/$(OS_NAME).img $(BOOT_EFI) ::/EFI/BOOT
-	mcopy -i $(BIN_DIR)/$(OS_NAME).img $(EFS_DIR)/startup.nsh ::
-	mcopy -i $(BIN_DIR)/$(OS_NAME).img $(EFS_DIR)/zap-light16.psf ::
-	mcopy -i $(BIN_DIR)/$(OS_NAME).img $(BIN_DIR)/kernel.elf ::
+	$(MTOOLS_DIR)/mformat -i $(BIN_DIR)/$(OS_NAME).img -f 1440 ::
+	$(MTOOLS_DIR)/mmd -i $(BIN_DIR)/$(OS_NAME).img ::/EFI
+	$(MTOOLS_DIR)/mmd -i $(BIN_DIR)/$(OS_NAME).img ::/EFI/BOOT
+	$(MTOOLS_DIR)/mcopy -i $(BIN_DIR)/$(OS_NAME).img $(BOOT_EFI) ::/EFI/BOOT
+	$(MTOOLS_DIR)/mcopy -i $(BIN_DIR)/$(OS_NAME).img $(EFS_DIR)/startup.nsh ::
+	$(MTOOLS_DIR)/mcopy -i $(BIN_DIR)/$(OS_NAME).img $(EFS_DIR)/zap-light16.psf ::
+	$(MTOOLS_DIR)/mcopy -i $(BIN_DIR)/$(OS_NAME).img $(BIN_DIR)/kernel.elf ::
 build-iso: kernel
 	rm -rf $(BIN_DIR)/iso/*.iso
 	rm -rf $(BIN_DIR)/iso/*.imgcp $(BIN_DIR)/$(OS_NAME).img $(BIN_DIR)/iso

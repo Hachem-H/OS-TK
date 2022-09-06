@@ -15,6 +15,7 @@ The Operating System Tool Kit is a platform to turn any CLI C/C++ application in
 │   ├── linker.ld      # Linker script and data layout
 │   └── Makefile
 ├── vendor             # External code.
+│   ├── mtools         # Specific version of mtools (new ones don't work)
 │   ├── OVMF           # OVMF binary for vms
 │   └── gnu-efi        # GNU-EFI source
 │       ├── [...]
