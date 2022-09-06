@@ -87,3 +87,9 @@ void Console_PrintString(const char* string)
     for (size_t i = 0; i < strlen((char*)string); ++i)
         Console_PutChar(string[i]);
 }
+
+void Console_SetPosition(uint32_t x, uint32_t y)
+{
+    Console.x = x;
+    Console.y = y;
+}

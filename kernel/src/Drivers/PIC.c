@@ -3,7 +3,7 @@
 #include "Core/IO.h"
 #include "Core/Interrupts.h"
 
-#include "stdint.h"
+#include <stdint.h>
 
 void RemapPIC()
 {

@@ -1,9 +1,5 @@
 #include "Bitmap.h"
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdbool.h>
-
 bool Bitmap_Get(Bitmap* bitmap, uint64_t index)
 {
     if (index > bitmap->size*8)

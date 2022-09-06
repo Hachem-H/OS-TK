@@ -8,7 +8,7 @@
 #include "Panic.h"
 #include "IO.h"
 
-#include "stdlib.h"
+#include <stdlib.h>
 
 PANIC_HANDLER(PageFault, "Page Fault detected");
 PANIC_HANDLER(DoubleFault, "Double Fault detected");
