@@ -31,6 +31,8 @@ void FrameBuffer_ClearColor(uint32_t color)
              pixelPointer++)
             *pixelPointer = color;
     }
+
+    GlobalTextRenderer.clearColor = color;
 }
 
 void TextRenderer_RenderChar(char character, uint32_t xOff, uint32_t yOff)
@@ -47,8 +49,12 @@ void TextRenderer_RenderChar(char character, uint32_t xOff, uint32_t yOff)
     for (unsigned long y = yOff; y < yOff+16; ++y)
     {
         for (unsigned long x = xOff;  x < xOff+8; ++x)
-            if ((*fontPointer & (0b10000000 >> (x-xOff))) > 0)
+        {
+                 if (character == ' ')
+                pixelPointer[x+y*frameBuffer->pixelsPerScanLine] = GlobalTextRenderer.clearColor;
+            else if ((*fontPointer & (0b10000000 >> (x-xOff))) > 0)
                 pixelPointer[x+y*frameBuffer->pixelsPerScanLine] = GlobalTextRenderer.color;
+        }
 
         fontPointer++;
     }
@@ -73,6 +79,12 @@ void TextRenderer_RenderText(const char* string, uint32_t x, uint32_t y)
         stringPointer++;
     }
 }
+
+void TextRenderer_Clear()
+{
+    FrameBuffer_ClearColor(GlobalTextRenderer.clearColor);
+}
+
 void TextRenderer_SetFont(PSFFont* font)    { GlobalTextRenderer.font = font;   }
 void TextRenderer_SetColor(uint32_t color)  { GlobalTextRenderer.color = color; }
 

@@ -10,6 +10,7 @@
 #include "Descriptors/IDT.h"
 
 #include "Drivers/Display.h"
+#include "Drivers/Console.h"
 #include "Drivers/PIC.h"
 
 #include "Core/Interrupts.h"
@@ -90,25 +91,13 @@ void _start(BootInfo* bootInfo)
 
     InitMemory(bootInfo);
     InitHeap((void*)0x0000100000000000, 0x10);
+    Console_Init();
     ISRInstall();
 
     outportb(PIC1_DATA, 0b11111101);
     outportb(PIC2_DATA, 0b11111111);
     asm ("sti");
-  
-    static int y = 0;
-    TextRenderer_RenderText("Successfully Loaded.", 0, y++);
 
-    void* address1 = malloc(0x8000);
-    void* address2 = malloc(16);
-    char buffer1[8];
-    char buffer2[8];
-    itoa((uint64_t)address1, buffer1, 16);
-    itoa((uint64_t)address2, buffer2, 16);
-    TextRenderer_RenderText(buffer1, 0, y++);
-    TextRenderer_RenderText(buffer2, 0, y++);
-    free(address1);
-    free(address2);
-
+    kmain();
     for (;;);
 }

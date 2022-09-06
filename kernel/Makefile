@@ -59,6 +59,7 @@ $(OBJ_DIR)/Core/Interrupts.o: $(SRC_DIR)/Core/Interrupts.c
 env:
 	@mkdir -p $(BIN_DIR)
 	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(BIN_DIR)/iso
 	@mkdir -p $(DIRS)
 clean:
 	@rm -rf $(BIN_DIR)
@@ -81,3 +82,7 @@ build-img: kernel
 	mcopy -i $(BIN_DIR)/$(OS_NAME).img $(EFS_DIR)/startup.nsh ::
 	mcopy -i $(BIN_DIR)/$(OS_NAME).img $(EFS_DIR)/zap-light16.psf ::
 	mcopy -i $(BIN_DIR)/$(OS_NAME).img $(BIN_DIR)/kernel.elf ::
+build-iso: kernel
+	rm -rf $(BIN_DIR)/iso/*.iso
+	rm -rf $(BIN_DIR)/iso/*.imgcp $(BIN_DIR)/$(OS_NAME).img $(BIN_DIR)/iso
+	xorriso -as mkisofs -R -f -e $(OS_NAME).img -no-emul-boot -o $(BIN_DIR)/iso/$(OS_NAME).iso /$(BIN_DIR)
