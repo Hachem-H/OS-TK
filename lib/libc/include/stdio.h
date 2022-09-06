@@ -1,5 +1,7 @@
 #pragma once
+
 #include <stdarg.h>
+#include <stddef.h>
 
 typedef struct FILE_t 
 {
@@ -24,6 +26,5 @@ void vprintf(const char* fmt, va_list arg);
 void sprintf(char* string, const char* fmt, ...);
 void vsprintf(char* string, const char* fmt, va_list arg);
 
-// --------------------------------- //
-
-char fgetchar();
+char getc(FILE* file);
+void fgets(char* string, size_t size, FILE* stream);

@@ -335,9 +335,38 @@ void vsprintf(char* string, const char* fmt, va_list arg)
     }
 }
 
-// --------------------------------- //
-
-char fgetchar()
+char getc(FILE* file)
 {
+    if (file != stdin)
+        return 0;
     return KeyboardReadChar();
+}
+
+void fgets(char* string, size_t size, FILE* stream)
+{
+    if (stream != stdin)
+        return;
+    
+    size_t index = 0;
+    char buffer = 0;
+    while (buffer != '\n')
+    {
+        buffer = getc();
+
+        if (buffer == '\b')
+            if (index > 0)
+            {
+                string[index] = 0;
+                index--;
+            }
+        
+        if (index != size)
+        {
+            string[index] = buffer;
+            index++;
+        }
+    }
+    
+    if (index != size)
+        string[index] = 0;
 }
