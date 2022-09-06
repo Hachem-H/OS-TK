@@ -2,4 +2,5 @@
 
 void kmain()
 {
+    printf("Hello World!\n");
 }

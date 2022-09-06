@@ -70,10 +70,27 @@ static void ISRInstall()
         interrupt->selector =  0x08;                                                        \
     }
 
-    SetIDTGate((void*)PageFault_Handler,              0x0E, IDT_TypeAttribute_InterruptGate);
-    SetIDTGate((void*)DoubleFault_Handler,            0x08, IDT_TypeAttribute_InterruptGate);
-    SetIDTGate((void*)KeyboardInterrupt_Handler,      0x21, IDT_TypeAttribute_InterruptGate);
-    SetIDTGate((void*)GeneralProtectionFault_Handler, 0x0E, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)DivisionByZero_Handler,            0x00, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)Debug_Handler,                     0x01, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)NonMaskableInterrupt_Handler,      0x02, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)Breakpoint_Handler,                0x03, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)IntoDetectedOverflow_Handler,      0x04, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)OutofBounds_Handler,               0x05, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)InvalidOpcode_Handler,             0x06, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)NoCoprocessor_Handler,             0x07, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)DoubleFault_Handler,               0x08, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)CoprocessorSegmentOverrun_Handler, 0x09, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)BadTSS_Handler,                    0x0A, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)SegmentNotPresent_Handler,         0x0B, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)StackFault_Handler,                0x0C, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)GeneralProtectionFault_Handler,    0x0D, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)PageFault_Handler,                 0x0E, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)UnknownInterrupt_Handler,          0x0F, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)CoprocessorFault_Handler,          0x10, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)AlignmentCheck_Handler,            0x12, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)MachineCheck_Handler,              0x13, IDT_TypeAttribute_InterruptGate);
+
+    SetIDTGate((void*)KeyboardInterrupt_Handler, 0x21, IDT_TypeAttribute_InterruptGate);
 
     asm ("lidt %0" : : "m" (idtRegister));
     RemapPIC();
