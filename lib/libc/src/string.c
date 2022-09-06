@@ -1,4 +1,5 @@
 #include "string.h"
+#include "stdlib.h"
 #include "stddef.h"
 #include "stdint.h"
 
@@ -8,6 +9,62 @@ size_t strlen(char* buffer)
     for (char* pointer = buffer; *pointer != 0x00; pointer++)
         size++;
     return size;
+}
+
+char* strtok(char* src, char* delm)
+{
+    static int currIndex = 0;
+    if(!src || !delm || src[currIndex] == '\0')
+        return NULL;
+    
+    char *buffer = (char *)malloc(sizeof(char)*100);
+    int i = currIndex;
+    int k = 0;
+    int j = 0;
+
+    while (src[i] != '\0')
+    {
+        j = 0;
+
+        while (delm[j] != '\0')
+        {
+            if (src[i] != delm[j])
+                buffer[k] = src[i];
+            else 
+                goto ret;
+            j++;
+        }
+
+        i++;
+        k++;
+    }
+ret:
+    buffer[i] = 0;
+    currIndex = i+1;
+    return buffer;
+}
+
+
+char* strcat(char* dest, char* src)
+{
+    char* pointer = dest + strlen(dest);
+
+    while (*src != 0x00)
+        *pointer++ += *src++;
+
+    *pointer = 0x00;
+    return dest;
+}
+
+char* strncat(char* dest, char* src, size_t size)
+{
+    char* pointer = dest + strlen(dest);
+
+    while (*src != 0x00 && size--)
+        *pointer++ += *src++;
+
+    *pointer = 0x00;
+    return dest;
 }
 
 char* strcpy(char* dest, char* src)
@@ -180,6 +237,22 @@ void* memchr(void* src, int value, size_t size)
     }
 
     return found;
+}
+
+void* memmove(void* dest, void* src, size_t size)
+{
+    char* csrc = (char*) src;
+    char* cdest = (char*) dest;
+
+    char* temp = (char*)malloc(size);
+    
+    for (int i = 0; i < size; i++)
+        temp[i] = csrc[i];
+    for (int i = 0; i < size; i++)
+        cdest[i] = temp[i];
+
+    free(temp);
+    return dest;
 }
 
 int memcmp(void* source1, void* source2, size_t size)

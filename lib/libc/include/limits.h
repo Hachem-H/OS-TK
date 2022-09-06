@@ -9,14 +9,14 @@
 #define CHAR_MIN -128
 #define CHAR_MAX  128
 
-#define SHRT_MIN -32768
-#define SHRT_MAX  32767
-#define USHRT_MAX 65535
+#define	USHRT_MAX	((unsigned short)(~0))
+#define	SHRT_MAX	((short)(USHRT_MAX >> 1))
+#define	SHRT_MIN	((short)(~SHRT_MAX))
 
-#define INT_MIN -2147483648
-#define INT_MIN  2147483648
-#define UINT_MAX 4294967295
+#define	UINT_MAX	((unsigned int)(~0))
+#define	INT_MAX	    ((int)(UINT_MAX >> 1))
+#define	INT_MIN	    ((int)(~INT_MAX))
 
-#define LONG_MIN -9223372036854775808
-#define LONG_MAX  9223372036854775808
-#define ULONG_MAX 18446744073709551615
+#define	ULONG_MAX	((unsigned long)(~0L))
+#define	LONG_MAX	((long)(ULONG_MAX >> 1))
+#define	LONG_MIN	((long)(~LONG_MAX))
