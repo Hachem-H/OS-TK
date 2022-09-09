@@ -14,6 +14,8 @@
 #include "Drivers/PIC.h"
 
 #include "Core/Interrupts.h"
+#include "Core/ACPI.h"
+#include "Core/PCI.h"
 #include "Core/IO.h"
 
 #include <stdbool.h>
@@ -96,6 +98,14 @@ static void ISRInstall()
     RemapPIC();
 }
 
+static void InitACPI(ACPI_RSDP2* rsdp)
+{
+    ACPI_SDTHeader*  xsdt = (ACPI_SDTHeader*)(rsdp->XSDTAddress);
+    ACPI_MCFGHeader* mcfg = (ACPI_MCFGHeader*)ACPI_FindTable(xsdt, (char*)"MCFG");
+
+    EnumeratePCI(mcfg);
+}
+
 void _start(BootInfo* bootInfo)
 {
     FrameBuffer_Init(bootInfo->frameBuffer);
@@ -110,11 +120,12 @@ void _start(BootInfo* bootInfo)
     InitHeap((void*)0x0000100000000000, 0x10);
     Console_Init();
     ISRInstall();
+    InitACPI((ACPI_RSDP2*)bootInfo->rsdp);
 
     outportb(PIC1_DATA, 0b11111101);
     outportb(PIC2_DATA, 0b11111111);
     asm ("sti");
 
-    kmain();
+    //kmain();
     for (;;);
 }

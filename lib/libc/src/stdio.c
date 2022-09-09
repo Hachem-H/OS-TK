@@ -192,7 +192,7 @@ void vsprintf(char* string, const char* fmt, va_list arg)
             case 's': {
                 char* output = va_arg(arg, char*);
                 for (int x=0; x<strlen(output);x++)
-                    string[j++] = output[x];
+                    string[j++] = output[x++];
             } break;
 
             case '%': {

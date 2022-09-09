@@ -23,6 +23,14 @@ static int memcmp(const void* lh, const void* rh, unsigned long long size)
 	return 0;
 }
 
+static UINTN strcmp(CHAR8* rh, CHAR8* lh, UINTN size)
+{
+    for (UINTN i = 0; i < size; ++i)
+        if (*rh != *lh)
+            return 0;
+    return 1;
+}
+
 FrameBuffer* InitializeGraphicsOutputProtocol() 
 {
 	static FrameBuffer frameBuffer;
@@ -191,9 +199,25 @@ EFI_STATUS efi_main (EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 											    &descriptorSize, &descriptorVersion);
 	}
 
+    EFI_CONFIGURATION_TABLE* configurationTable = systemTable->ConfigurationTable;
+    void* rsdp = NULL;
+    {
+        EFI_GUID acpi2TableGUID = ACPI_20_TABLE_GUID;
+
+        for (UINTN index = 0; index < systemTable->NumberOfTableEntries; ++index)
+        {
+            if (CompareGuid(&configurationTable[index].VendorGuid, &acpi2TableGUID))
+                if (strcmp((CHAR8*) "RSD PTR ", (CHAR8*) configurationTable->VendorTable, 8))
+                    rsdp = (void*) configurationTable->VendorTable;
+            
+            configurationTable++;
+        }
+    }
+
 	BootInfo bootInfo;
 	bootInfo.frameBuffer = frameBuffer;
 	bootInfo.font = font;
+    bootInfo.rsdp = rsdp;
 	bootInfo.memoryMap = memoryMap;
 	bootInfo.memoryMapSize = memoryMapSize;
 	bootInfo.descriptorSize = descriptorSize;
