@@ -24,7 +24,6 @@ The Operating System Tool Kit is a platform to turn any CLI C/C++ application in
 ├── lib                # Library reimplementations
 │   ├── libc               # C Standard Library
 │   ├── libcpp             # C++ Standard Library
-│   └── libc-rs            # libc Rust bindings
 ├── src                # Your custom OS goes here
 ├── Makefile
 ├── LICENSE
@@ -54,6 +53,7 @@ void kmain()
 
 ## Possible future features
 - Possible go bindings
+- Possible rust bindings
 - Interpreted language runtimes, to allow simpler languages (like `Lua` and `Python`) to be used to develop custom OS-TK kernels. The implementation would probably involve a bootstrap, loading all the sources into the filesystem, then executing a kernel which then runs the language runtime/interpreter.
 - Hardware features and drivers:
     - Possible networking

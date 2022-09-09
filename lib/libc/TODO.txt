@@ -8,19 +8,14 @@
 - [x] float.h
 - [x] limits.h
 - [x] string.h
-
-=== GOOD ENOUGH ===
+- [x] math.h
 - [x] errno.h
-- [x] stdio.h
 
 ==== DOING ====
 - [-] stdlib.h
+- [-] stdio.h
 
 ==== TO DO ====
 - [ ] signal.h
 - [ ] locale.h
-- [ ] math.h
 - [ ] time.h
-
-*NOTE*: I will not be reimplementing stdarg.h
-        Since its compiler dependent. (well sort of)

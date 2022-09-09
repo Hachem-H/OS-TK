@@ -1,7 +1,8 @@
-#include "stdio.h"
-#include "ctype.h"
 #include "stdlib.h"
+#include "stddef.h"
 #include "string.h"
+#include "ctype.h"
+#include "stdio.h"
 
 #include <Drivers/Display.h>
 #include <Drivers/Console.h>
@@ -13,11 +14,19 @@ static FILE stdinTEMP;
 
 FILE* stdout = &stdoutTEMP;
 FILE* stderr = &stderrTEMP;
-FILE* stdin  = &stdinTEMP; 
+FILE* stdin  = &stdinTEMP;
 
 void putchar(const char character) { Console_PutChar(character); }
 void puts(const char* string)      { Console_PrintString(string);
                                      Console_NewLine();          }
+
+void putchar_(char character) { character; }
+
+void fOutputStream(char character, void* stream)
+{
+    FILE* file = (FILE*)stream;
+    fputc(file, character);
+}
 
 void putc(const char character)
 {
@@ -36,176 +45,42 @@ void fputs(FILE* file, const char* string)
         puts(string);
 }
 
-void printf(const char* fmt, ...)
+int printf(const char* fmt, ...)
 {
-    fprintf(stdout, fmt);
+    return fprintf(stdout, fmt);
 }
 
-void fprintf(FILE* file, const char* fmt, ...)
+int vprintf(const char* fmt, va_list arg)
 {
-    if (file == stdout || file == stderr)
-    {
-        va_list list;
-        va_start(list, fmt);
-        vfprintf(file, fmt, list);
-        va_end(list);
-    }
+    return vfprintf(stdout, fmt, arg);
 }
 
-void vprintf(const char* fmt, va_list arg)
+int fprintf(FILE* file, const char* fmt, ...)
 {
-    for (int i = 0; i < strlen((char*)fmt); i++)
-    {
-        if (fmt[i] == '%')
-        {
-            i++;
-
-            switch (fmt[i])
-            {
-            case 'd': {
-                int number = va_arg(arg, int);
-                char output[24] = {0};
-                itoa(number, output, 10); 
-                Console_PrintString(output);
-            } break;
-
-            case 'c': {
-                char output = va_arg(arg, int);
-                Console_PutChar(output);
-            } break;
-            
-            case 'x': {
-                int number = va_arg(arg, int);
-                char output[24] = {0};
-                itoa(number, output, 16);
-                Console_PrintString(output);
-            } break;
-
-            case 'X': {
-                int number = va_arg(arg, int);
-                char output[24] = {0};
-                itoa(number, output, 16);
-                for (int i=0;i<strlen(output);i++)
-                    if (output[i] > 'a' && output[i] < 'z')
-                    {
-                        output[i] -= 'a';
-                        output[i] += 'a';
-                    }
-                Console_PrintString(output);
-            } break;
-
-            case 'p': {
-                int number = va_arg(arg, int);
-                char output[24] = {0};
-                itoa(number, output, 16);
-                Console_PrintString(output);
-            } break;
-
-            case 's': {
-                char* output = va_arg(arg, char*);
-                Console_PrintString(output);
-            } break;
-
-            case '%': {
-                Console_PutChar('%');
-            } break;
-            }
-
-            continue;
-        }
-        
-        putchar(fmt[i]);
-    }
+    va_list args;
+    va_start(args, fmt);
+    const int ret = vfprintf(file, fmt, args);
+    va_end(args);
+    return ret;
 }
 
-void vfprintf(FILE* file, const char* fmt, va_list arg)
+int snprintf(char* string, size_t size, const char* fmt, ...)
 {
-    if (file == stdout || file == stderr)
-        vprintf(fmt, arg);
+    va_list args;
+    va_start(args, fmt);
+    const int ret = vsnprintf(string, size, fmt, args);
+    va_end(args);
+    return ret;
 }
 
-void sprintf(char* string, const char* fmt, ...)
+int vfprintf(FILE* file, const char* fmt, va_list arg)
 {
-    va_list list;
-    va_start(list, fmt);
-    vsprintf(string, fmt, list);
-    va_end(list);
+    return 0;
 }
 
-void vsprintf(char* string, const char* fmt, va_list arg)
+int vsnprintf(char* string, size_t size, const char* fmt, va_list arg)
 {
-    int j = 0;
-
-    for (int i = 0; i < strlen((char*)fmt); i++)
-    {
-
-        if (fmt[i] == '%')
-        {
-            i++;
-
-            switch (fmt[i])
-            {
-            case 'd': {
-                int number = va_arg(arg, int);
-                char output[24] = {0};
-                itoa(number, output, 10); 
-                for (int x=0; x<strlen(output);x++)
-                    string[j++] = output[x];
-            } break;
-
-            case 'c': {
-                char output = va_arg(arg, int);
-                string[j] = output;
-            } break;
-            
-            case 'x': {
-                int number = va_arg(arg, int);
-                char output[24] = {0};
-                itoa(number, output, 16);
-                for (int x=0; x<strlen(output);x++)
-                    string[j++] = output[x];
-            } break;
-
-            case 'X': {
-                int number = va_arg(arg, int);
-                char output[24] = {0};
-                itoa(number, output, 16);
-                for (int i=0;i<strlen(output);i++)
-                    if (output[i] > 'a' && output[i] < 'z')
-                    {
-                        output[i] -= 'a';
-                        output[i] += 'a';
-                    }
-
-                for (int x=0; x<strlen(output);x++)
-                    string[j++] = output[x];
-            } break;
-
-            case 'p': {
-                int number = va_arg(arg, int);
-                char output[24] = {0};
-                itoa(number, output, 16);
-                for (int x=0; x<strlen(output);x++)
-                    string[j++] = output[x];
-            } break;
-
-            case 's': {
-                char* output = va_arg(arg, char*);
-                for (int x=0; x<strlen(output);x++)
-                    string[j++] = output[x++];
-            } break;
-
-            case '%': {
-                string[j] = fmt[i];
-            } break;
-            }
-
-            continue;
-        }
-        
-        string[j] = fmt[i];
-        j++;
-    }
+    return 0;
 }
 
 char getc(FILE* file)

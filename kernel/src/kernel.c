@@ -104,9 +104,8 @@ static void InitACPI(ACPI_RSDP2* rsdp)
 {
     ACPI_SDTHeader*  xsdt = (ACPI_SDTHeader*)(rsdp->XSDTAddress);
     ACPI_MCFGHeader* mcfg = (ACPI_MCFGHeader*)ACPI_FindTable(xsdt, (char*)"MCFG");
-
     EnumeratePCI(mcfg);
-}
+ }
 
 void _start(BootInfo* bootInfo)
 {
@@ -124,12 +123,12 @@ void _start(BootInfo* bootInfo)
     Console_Init();
 
     ISRInstall();
-    InitACPI((ACPI_RSDP2*)bootInfo->rsdp);
+    //InitACPI((ACPI_RSDP2*)bootInfo->rsdp);
 
     outportb(PIC1_DATA, 0b11111000);
     outportb(PIC2_DATA, 0b11101111);
     asm ("sti");
 
-    //kmain();
+    kmain();
     for (;;);
 }

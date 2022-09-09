@@ -42,3 +42,5 @@ vendor/mtools/*.orig
 vendor/mtools/a.out
 vendor/mtools/*.o
 vendor/mtools/core
+vendor/mtools/config.*
+vendor/mtools/Makefile

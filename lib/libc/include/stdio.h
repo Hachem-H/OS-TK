@@ -23,12 +23,12 @@ void puts(const char* string);
 void fputc(FILE* file, const char character);
 void fputs(FILE* file, const char* string);
 
-void printf(const char* fmt, ...);
-void fprintf(FILE* file, const char* fmt, ...);
-void vfprintf(FILE* file, const char* fmt, va_list arg);
-void vprintf(const char* fmt, va_list arg);
-void sprintf(char* string, const char* fmt, ...);
-void vsprintf(char* string, const char* fmt, va_list arg);
+int printf(const char* fmt, ...);
+int fprintf(FILE* file, const char* fmt, ...);
+int vfprintf(FILE* file, const char* fmt, va_list arg);
+int vprintf(const char* fmt, va_list arg);
+int snprintf(char* string,  size_t size, const char* fmt, ...);
+int vsnprintf(char* string,  size_t size, const char* fmt, va_list arg);
 
 int scanf(const char* fmt, ...);
 int fscanf(FILE* file, const char* fmt, ...);
