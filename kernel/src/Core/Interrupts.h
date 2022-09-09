@@ -33,3 +33,4 @@ INTERRUPT_HANDLER(AlignmentCheck);
 INTERRUPT_HANDLER(MachineCheck);
 
 INTERRUPT_HANDLER(KeyboardInterrupt);
+INTERRUPT_HANDLER(PITInterrupt);

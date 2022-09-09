@@ -12,6 +12,7 @@
 #include "Drivers/Display.h"
 #include "Drivers/Console.h"
 #include "Drivers/PIC.h"
+#include "Drivers/PIT.h"
 
 #include "Core/Interrupts.h"
 #include "Core/ACPI.h"
@@ -93,6 +94,7 @@ static void ISRInstall()
     SetIDTGate((void*)MachineCheck_Handler,              0x13, IDT_TypeAttribute_InterruptGate);
 
     SetIDTGate((void*)KeyboardInterrupt_Handler, 0x21, IDT_TypeAttribute_InterruptGate);
+    SetIDTGate((void*)PITInterrupt_Handler,      0x20, IDT_TypeAttribute_InterruptGate);
 
     asm ("lidt %0" : : "m" (idtRegister));
     RemapPIC();
@@ -118,12 +120,14 @@ void _start(BootInfo* bootInfo)
 
     InitMemory(bootInfo);
     InitHeap((void*)0x0000100000000000, 0x10);
+
     Console_Init();
+
     ISRInstall();
     InitACPI((ACPI_RSDP2*)bootInfo->rsdp);
 
-    outportb(PIC1_DATA, 0b11111101);
-    outportb(PIC2_DATA, 0b11111111);
+    outportb(PIC1_DATA, 0b11111000);
+    outportb(PIC2_DATA, 0b11101111);
     asm ("sti");
 
     //kmain();

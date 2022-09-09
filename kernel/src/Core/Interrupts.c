@@ -3,6 +3,7 @@
 #include "Drivers/Keyboard.h"
 #include "Drivers/Display.h"
 #include "Drivers/PIC.h"
+#include "Drivers/PIT.h"
 
 #include "Interrupts.h"
 #include "Panic.h"
@@ -34,5 +35,11 @@ INTERRUPT_HANDLER(KeyboardInterrupt)
 {
     uint8_t scanCode = inportb(0x60);
     KeyboardHandler(scanCode);
-    RemapPIC();
+    PIC_EndMaster();
+}
+
+INTERRUPT_HANDLER(PITInterrupt)
+{
+    PIT_Tick();    
+    PIC_EndMaster();
 }
