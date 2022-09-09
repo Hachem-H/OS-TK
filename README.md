@@ -49,7 +49,6 @@ void kmain()
 ## Features
 - `EXT4`/`FAT32` file systems.
 - Somewhat of a fully implemented C/C++ standard library.
-- `libc` bindings to rust allowing to write the custom OS in rust using the C standard library.
 
 ## Possible future features
 - Possible go bindings
